@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site em Construção</title>
+    <style>
+        /* Estilização da página */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6; /* Cor de fundo suave */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+
+        /* Container que junta o balão e a imagem */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+
+        /* O Balão de Fala Ajustado para no máximo 3 linhas com sombra */
+        .balao-fala {
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 12px 18px;
+            text-align: center;
+            font-size: 15px; /* Tamanho levemente ajustado para encaixar perfeitamente */
+            font-weight: 600;
+            color: #374151;
+            width: 220px; /* Largura ideal para forçar a quebra em exatamente 3 linhas */
+            line-height: 1.35;
+            position: relative;
+            margin-bottom: 22px; /* Espaço entre o balão e a foto */
+            
+            /* Sombra do balão mantida e valorizada */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05); 
+        }
+
+
+        /* O triângulo/bico do balão apontando para baixo */
+        .balao-fala::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
+
+
+        .balao-fala::before {
+            content: '';
+            position: absolute;
+            bottom: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 11px 11px 0;
+            border-style: solid;
+            border-color: #cbd5e1 transparent;
+            display: block;
+            width: 0;
+            z-index: -1;
+        }
+
+
+        /* Foto da Doutora SEM NENHUMA borda ou sombra */
+        .foto-doutora {
+            display: block;
+            max-width: 200px; /* Ajuste o tamanho conforme achar melhor */
+            height: auto;
+            border: none !important;      /* Garante que não tenha borda */
+            box-shadow: none !important;  /* Remove completamente qualquer sombra */
+            outline: none !important;     /* Remove contornos adicionais */
+            background: transparent;      /* Garante fundo transparente */
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="container">
+        <div class="balao-fala">
+            Este site está em construção e vai ficar maravilhoso. Aguarde!
+        </div>
+
+
+        <img class="foto-doutora" src="473623" alt="Doutora Cristina">
+    </div>
+
+
+</body>
+</html>
