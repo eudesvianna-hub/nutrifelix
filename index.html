@@ -196,33 +196,87 @@
     </footer>
 
     <script>
-        // Quando a página carrega, verifica se existe o parâmetro 'id' ou parâmetro de rota na URL
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            if (id) {
-                document.getElementById('cardapioId').value = id;
-                validarDocumento();
-            }
-        });
+  // 1. Cole aqui as credenciais do seu projeto Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4",
+    authDomain: "antares-7ebcb.firebaseapp.com",
+    projectId: "antares-7ebcb",
+  storageBucket: "antares-7ebcb.firebasestorage.app",
+      messagingSenderId: "663101896650",
+    appId: "1:663101896650:web:7b23ff22cfd97a371b4133"
+  };
 
-        function validarDocumento() {
-            const id = document.getElementById('cardapioId').value.trim();
-            const resultadoDiv = document.getElementById('resultadoValidacao');
-            const dadosDiv = document.getElementById('dadosCardapio');
+  // Inicializa o Firebase e o Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-            if (!id) {
-                alert('Por favor, informe um ID válido.');
-                return;
-            }
+  // Torna a função de validação acessível globalmente
+  window.validarDocumento = async function() {
+    const id = document.getElementById('cardapioId').value.trim();
+    const resultadoDiv = document.getElementById('resultadoValidacao');
+    const alertDiv = resultadoDiv.querySelector('.alert');
+    const dadosDiv = document.getElementById('dadosCardapio');
 
-            // Exemplo de exibição do resultado:
-            resultadoDiv.classList.remove('d-none');
-            dadosDiv.innerHTML = `<strong>Código Consultado:</strong> ${id}<br><strong>Status:</strong> Documento emitido por Nutri Félix.`;
-            
-            // Aqui você adicionará a chamada SDK do Firebase Firestore para buscar o documento real pelo ID
-        }
+    if (!id) {
+      alert('Por favor, informe um ID válido.');
+      return;
+    }
+
+    // Exibe indicador de carregamento
+    resultadoDiv.classList.remove('d-none');
+    alertDiv.className = "alert alert-info";
+    alertDiv.querySelector('.alert-heading').innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Consultando Firebase...';
+    dadosDiv.innerHTML = "Aguarde enquanto verificamos a autenticidade do documento.";
+
+    try {
+      // 2. Aponta para a coleção 'cardapios' e busca o documento pelo ID
+      const docRef = doc(db, "cardapios", id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        
+        // Documento Encontrado com Sucesso!
+        alertDiv.className = "alert alert-success";
+        alertDiv.querySelector('.alert-heading').innerHTML = '<i class="fa-solid fa-circle-check me-2"></i>Documento Autêntico e Válido!';
+        
+        // Exibe os dados retornados do Firebase (Ajuste os nomes dos campos se necessário, ex: data.nomeCliente, data.dataEmissao)
+        dadosDiv.innerHTML = `
+          <strong>Código do Documento:</strong> ${docSnap.id}<br>
+          ${data.nomeCliente ? `<strong>Paciente / Cliente:</strong> ${data.nomeCliente}<br>` : ''}
+          ${data.titulo ? `<strong>Título:</strong> ${data.titulo}<br>` : ''}
+          ${data.data ? `<strong>Data de Emissão:</strong> ${data.data}<br>` : ''}
+          <strong>Status:</strong> Emitido e assinado por Nutri Félix.
+        `;
+      } else {
+        // ID não existe no Firebase
+        alertDiv.className = "alert alert-danger";
+        alertDiv.querySelector('.alert-heading').innerHTML = '<i class="fa-solid fa-circle-xmark me-2"></i>Documento Não Encontrado!';
+        dadosDiv.innerHTML = "O código informado não corresponde a nenhum documento oficial assinado pela Nutri Félix.";
+      }
+    } catch (error) {
+      console.error("Erro ao buscar no Firebase:", error);
+      alertDiv.className = "alert alert-warning";
+      alertDiv.querySelector('.alert-heading').innerHTML = '<i class="fa-solid fa-triangle-exclamation me-2"></i>Erro na Validação';
+      dadosDiv.innerHTML = "Ocorreu um erro ao consultar o servidor. Verifique as Regras de Segurança do Firebase ou se as credenciais estão corretas.";
+    }
+  };
+
+  // Quando a página carrega com parâmetro na URL (ex: ?id=25pY1tFGb1E83EkQMB85)
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    if (id) {
+      document.getElementById('cardapioId').value = id;
+      window.validarDocumento();
+    }
+  });
+</script>
     </script>
 </body>
 </html>
