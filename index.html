@@ -1,107 +1,228 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site em Construção</title>
+    <title>Nutri Félix | Nutrição, Saúde e Inovação</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* Estilização da página */
+        :root {
+            --primary-color: #2e7d32; /* Verde Saúde */
+            --secondary-color: #fbc02d; /* Dourado/Amarelo */
+            --bg-light: #f4f6f8;
+        }
+
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff; /* Cor de fundo suave */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            color: #333;
         }
 
-
-        /* Container que junta o balão e a imagem */
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--primary-color) !important;
         }
 
-
-        /* O Balão de Fala Ajustado para no máximo 3 linhas com sombra */
-        .balao-fala {
-            background-color: #ffffff;
-            border: 2px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 12px 18px;
+        .hero-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 80px 0;
             text-align: center;
-            font-size: 15px; /* Tamanho levemente ajustado para encaixar perfeitamente */
+        }
+
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
             font-weight: 600;
-            color: #374151;
-            width: 220px; /* Largura ideal para forçar a quebra em exatamente 3 linhas */
-            line-height: 1.35;
-            position: relative;
-            margin-bottom: 22px; /* Espaço entre o balão e a foto */
-            
-            /* Sombra do balão mantida e valorizada */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05); 
         }
 
-
-        /* O triângulo/bico do balão apontando para baixo */
-        .balao-fala::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 10px 10px 0;
-            border-style: solid;
-            border-color: #ffffff transparent;
-            display: block;
-            width: 0;
+        .btn-primary-custom:hover {
+            background-color: #1b5e20;
+            color: white;
         }
 
-
-        .balao-fala::before {
-            content: '';
-            position: absolute;
-            bottom: -13px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 11px 11px 0;
-            border-style: solid;
-            border-color: #cbd5e1 transparent;
-            display: block;
-            width: 0;
-            z-index: -1;
+        .validation-box {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
         }
 
+        footer {
+            background-color: #1b5e20;
+            color: white;
+            padding: 30px 0;
+        }
 
-        /* Foto da Doutora SEM NENHUMA borda ou sombra */
-        .foto-doutora {
-            display: block;
-            max-width: 200px; /* Ajuste o tamanho conforme achar melhor */
-            height: auto;
-            border: none !important;      /* Garante que não tenha borda */
-            box-shadow: none !important;  /* Remove completamente qualquer sombra */
-            outline: none !important;     /* Remove contornos adicionais */
-            background: transparent;      /* Garante fundo transparente */
+        footer a {
+            color: #a5d6a7;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
-
-    <div class="container">
-        <div class="balao-fala">
-            Este site está em construção e vai ficar maravilhoso. Aguarde!
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-leaf me-2"></i>Nutri Félix</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#sobre">Sobre</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#babus">Ônibus Babus</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#app">Aplicativo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#validar">Validar Cardápio</a></li>
+                </ul>
+            </div>
         </div>
+    </nav>
 
+    <header class="hero-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold text-success mb-3">Saúde e Nutrição Transformando Vidas</h1>
+            <p class="lead text-secondary mb-4">Acompanhamento nutricional personalizado, inovação com o consultório móvel Babus e tecnologia a favor do seu bem-estar.</p>
+            <a href="#validar" class="btn btn-primary-custom me-2"><i class="fa-solid fa-qrcode me-2"></i>Validar Cardápio</a>
+            <a href="#app" class="btn btn-outline-success btn-lg rounded-pill">Conhecer o App</a>
+        </div>
+    </header>
 
-        <img class="foto-doutora" src="473623.png" alt="Doutora Cristina">
-    </div>
+    <section id="validar" class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="validation-box text-center">
+                        <h3 class="fw-bold mb-3"><i class="fa-solid fa-shield-halved text-success me-2"></i>Validação Autêntica de Cardápio</h3>
+                        <p class="text-muted mb-4">Insira abaixo o código presente no seu documento ou leia o QR Code impresso para verificar a autenticidade.</p>
+                        
+                        <div class="input-group mb-3">
+                            <input type="text" id="cardapioId" class="form-control form-control-lg" placeholder="Código do documento (Ex: 25pY1tFGb...)" />
+                            <button class="btn btn-primary-custom" type="button" onclick="validarDocumento()">Verificar</button>
+                        </div>
 
+                        <div id="resultadoValidacao" class="mt-4 text-start d-none">
+                            <div class="alert alert-success" role="alert">
+                                <h5 class="alert-heading"><i class="fa-solid fa-circle-check me-2"></i>Documento Autêntico e Válido!</h5>
+                                <hr>
+                                <p id="dadosCardapio" class="mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <section id="babus" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="p-4 bg-light rounded-4 border">
+                        <i class="fa-solid fa-bus text-success display-1 mb-3"></i>
+                        <h2 class="fw-bold">Consultório Móvel Babus</h2>
+                        <p class="text-muted">Um projeto inovador que leva atendimento nutricional de excelência até onde as pessoas estão. O ônibus Babus é uma unidade completa preparada para consultas, avaliação física e atendimento humanizado.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3 class="fw-bold mb-3">Impacto Social e Comunidade</h3>
+                    <p>Além dos atendimentos clínicos, a Nutri Félix desenvolve projetos sociais voltados para a conscientização alimentar, promoção da saúde e apoio comunitário em Itapecerica da Serra e região.</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Atendimentos itinerantes</li>
+                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Ações de arrecadação e apoio social</li>
+                        <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Educação nutricional comunitária</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="app" class="py-5 bg-light">
+        <div class="container text-center">
+            <h2 class="fw-bold mb-3">Seu Acompanhamento na Palma da Mão</h2>
+            <p class="text-muted mb-5">Conheça o aplicativo exclusivo para clientes Nutri Félix. Otimize sua rotina e alcance seus objetivos.</p>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card card-custom p-4 h-100">
+                        <i class="fa-solid fa-utensils text-success display-5 mb-3"></i>
+                        <h5>Cardápios Interativos</h5>
+                        <p class="text-muted">Acesse seu plano alimentar atualizado a qualquer momento de forma prática.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-custom p-4 h-100">
+                        <i class="fa-solid fa-camera text-success display-5 mb-3"></i>
+                        <h5>Registro e Análise de Refeições</h5>
+                        <p class="text-muted">Acompanhe seu progresso e mantenha o foco no seu plano de emagrecimento com ajuda da tecnologia.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-custom p-4 h-100">
+                        <i class="fa-solid fa-chart-line text-success display-5 mb-3"></i>
+                        <h5>Acompanhamento Contínuo</h5>
+                        <p class="text-muted">Monitore sua evolução física, metas e métricas de saúde com facilidade.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center">
+        <div class="container">
+            <h5 class="fw-bold mb-3">Nutri Félix</h5>
+            <p class="mb-3">Transformando vidas através da nutrição e da inovação.</p>
+            <div class="mb-3">
+                <a href="https://instagram.com/nutrifelix" target="_blank" class="mx-2 fs-4"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="mx-2 fs-4"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+            <small>&copy; 2026 Nutri Félix. Todos os direitos reservados.</small>
+        </div>
+    </footer>
+
+    <script>
+        // Quando a página carrega, verifica se existe o parâmetro 'id' ou parâmetro de rota na URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+
+            if (id) {
+                document.getElementById('cardapioId').value = id;
+                validarDocumento();
+            }
+        });
+
+        function validarDocumento() {
+            const id = document.getElementById('cardapioId').value.trim();
+            const resultadoDiv = document.getElementById('resultadoValidacao');
+            const dadosDiv = document.getElementById('dadosCardapio');
+
+            if (!id) {
+                alert('Por favor, informe um ID válido.');
+                return;
+            }
+
+            // Exemplo de exibição do resultado:
+            resultadoDiv.classList.remove('d-none');
+            dadosDiv.innerHTML = `<strong>Código Consultado:</strong> ${id}<br><strong>Status:</strong> Documento emitido por Nutri Félix.`;
+            
+            // Aqui você adicionará a chamada SDK do Firebase Firestore para buscar o documento real pelo ID
+        }
+    </script>
 </body>
 </html>
