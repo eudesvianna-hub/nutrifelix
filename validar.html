@@ -65,31 +65,57 @@
     const input = document.getElementById('codigoInput');
     const statusContainer = document.getElementById('statusContainer');
 
-    async function validarCardapio(codigo) {
-      if (!codigo) return;
-      statusContainer.innerHTML = '<p>Buscando cardápio no Firestore...</p>';
+  // Função de validação buscando direto pelo ID do Documento no Firestore
+async function validarCardapio(docId) {
+  if (!docId) return;
 
-      try {
-        const querySnapshot = await db.collection('CardapioIA')
-                                      .where('Cardapio', '==', codigo.trim())
-                                      .get();
+  statusContainer.innerHTML = '<p class="loading-spinner">Validando cardápio no sistema...</p>';
 
-        if (!querySnapshot.empty) {
-          let html = '<div class="result-card result-success"><strong>Cardápio Encontrado!</strong>';
-          querySnapshot.forEach(doc => {
-            const data = doc.data();
-            html += `<p style="margin-top:8px;">Código Válido: ${data.Cardapio}</p>`;
-          });
-          html += '</div>';
-          statusContainer.innerHTML = html;
-        } else {
-          statusContainer.innerHTML = `<div class="result-card result-error">Cardápio código "${codigo}" não encontrado.</div>`;
-        }
-      } catch (err) {
-        statusContainer.innerHTML = '<div class="result-card result-error">Erro ao consultar a base de dados.</div>';
+  try {
+    // Consulta direta ao documento pelo ID dentro da coleção 'CardapioIA'
+    const docRef = db.collection('CardapioIA').doc(docId.trim());
+    const docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+      // Documento foi encontrado!
+      const data = docSnap.data();
+
+      let html = '<div class="result-card result-success">';
+      html += '<div class="result-title"> Cardápio Válido e Autêntico!</div>';
+      html += `<p><strong>ID do Cardápio:</strong> ${docSnap.id}</p>`;
+
+      // Exibe os dados do documento caso existam
+      if (data.Cardapio) {
+        html += `<p><strong>Cardápio:</strong> ${data.Cardapio}</p>`;
       }
-    }
+      if (data.dataCardapio) {
+        // Trata Timestamp do Firebase se disponível
+        const dataValida = data.dataCardapio.toDate ? data.dataCardapio.toDate() : new Date(data.dataCardapio.seconds * 1000);
+        html += `<p><strong>Data:</strong> ${dataValida.toLocaleDateString('pt-BR')}</p>`;
+      }
 
+      html += '</div>';
+      statusContainer.innerHTML = html;
+
+    } else {
+      // Documento com esse ID não existe na coleção
+      statusContainer.innerHTML = `
+        <div class="result-card result-error">
+          <div class="result-title"> Cardápio não localizado</div>
+          <p>O ID "<strong>${docId}</strong>" não consta em nosso sistema.</p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error("Erro ao buscar documento no Firestore:", error);
+    statusContainer.innerHTML = `
+      <div class="result-card result-error">
+        <div class="result-title">Erro na Validação</div>
+        <p>Não foi possível conectar ao banco de dados. Verifique sua conexão e credenciais.</p>
+      </div>
+    `;
+  }
+}
     window.addEventListener('DOMContentLoaded', () => {
       const search = window.location.search;
       if (search) {
