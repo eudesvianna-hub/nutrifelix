@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nutri Félix - Validar Cardápio</title>
   
-  <!-- Firebase SDK (v8) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -304,13 +301,11 @@
 </head>
 <body>
 
-  <!-- Cabeçalho Principal -->
   <header>
     <img src="nutriLogo.png" alt="Nutri Félix Logo" class="logo-img">
     <button class="menu-btn">&#9776;</button>
   </header>
 
-  <!-- Layout Principal -->
   <div class="main-layout">
     <div class="card-left">
       <div class="card-img-wrapper">
@@ -329,7 +324,6 @@
     </div>
   </div>
 
-  <!-- Contêiner do PDF Oculto -->
   <div id="pdf-container-wrapper">
     <div id="pdf-content" class="pdf-page"></div>
   </div>
@@ -353,14 +347,14 @@
     let currentDocId = '';
     let currentNomePaciente = 'Não informado';
 
-    // Lê o parâmetro ?id= na URL do navegador
+    // Executa ao carregar a página: lê ?id= da URL e dispara a validação
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const docId = urlParams.get('id');
 
       if (docId) {
-        document.getElementById('inputDocId').value = docId;
-        validarCardapio(docId);
+        document.getElementById('inputDocId').value = docId.trim();
+        validarCardapio(docId.trim());
       }
     });
 
