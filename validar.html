@@ -5,224 +5,423 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nutri Félix - Validar Cardápio</title>
   
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
-    /* Estilos Principais da Página de Validação */
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
-    
-    header { width: 100%; max-width: 900px; background: #fff8e7; border: 1px solid #707070; border-radius: 4px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .logo-img { width: 55px; height: 55px; object-fit: contain; }
-    .menu-btn { background-color: #5551f1; color: white; border: none; width: 42px; height: 42px; border-radius: 8px; font-size: 20px; cursor: pointer; }
-    
-    .main-layout { display: flex; gap: 20px; max-width: 900px; width: 100%; }
-    .card-left { background: white; border: 1px solid #c8c8c8; border-radius: 12px; width: 200px; padding: 12px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-    .card-img-wrapper { width: 100%; height: 220px; border: 1.5px solid #8183f0; border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
-    .card-img { width: 100%; height: 100%; object-fit: cover; }
-    .card-title { font-size: 14px; font-weight: 700; text-align: center; }
-    
-    .validation-box { flex: 1; background: white; border: 1px solid #b5b5b5; border-radius: 8px; padding: 24px; min-height: 280px; }
-    .search-form { display: flex; gap: 10px; margin-bottom: 20px; }
-    .input-code { flex: 1; padding: 10px 14px; border: 1px solid #707070; border-radius: 4px; font-size: 14px; }
-    .btn-submit { background-color: #5551f1; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-    
-    .status-container { margin-top: 15px; font-size: 14px; }
-    .result-card { border-radius: 8px; padding: 20px; margin-top: 10px; text-align: center; }
-    .result-success { background-color: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
-    .result-error { background-color: #ffebee; border: 1px solid #ef9a9a; color: #c62828; text-align: left; }
-    
-    .btn-download-pdf { margin-top: 16px; background-color: #2c7a78; color: #ffffff; border: none; padding: 12px 24px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
-    .btn-download-pdf:hover { background-color: #205958; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-    /* ==========================================
-       ESTILOS EXCLUSIVOS DO TEMPLATE DO PDF
-       (Cores e visual idênticos à imagem 533774.png)
-       ========================================== */
-    #pdf-wrapper { position: absolute; left: -9999px; top: 0; }
-    .pdf-container { width: 190mm; background: #ffffff; padding: 8mm 8mm; color: #2d3748; font-size: 9pt; line-height: 1.35; box-sizing: border-box; }
-    
-    /* Banner do Cabeçalho (Verde Escuro / Teal) */
-    .pdf-banner { background-color: #2c7a78; border-radius: 6px; padding: 12px 16px; color: #ffffff; margin-bottom: 12px; }
-    .pdf-banner h1 { font-size: 13pt; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; }
-    .pdf-banner .pdf-patient { font-size: 10.5pt; font-weight: 700; margin-bottom: 2px; }
-    .pdf-banner .pdf-sub { font-size: 8.5pt; opacity: 0.92; }
+    body {
+      background-color: #f0fdf4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 10px;
+    }
 
-    /* Cards de Refeição */
-    .meal-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #ffffff; page-break-inside: avoid; }
-    .meal-type { color: #2c7a78; font-size: 8.5pt; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.3px; }
-    .meal-prato { font-size: 10pt; font-weight: 700; color: #1e293b; margin-bottom: 5px; }
-    .meal-text { font-size: 8.5pt; color: #334155; margin-bottom: 5px; }
-    .meal-topping { font-size: 8.5pt; color: #2c7a78; font-weight: 600; margin-bottom: 6px; }
-    
-    /* Caixas Destacadas (Substituição e Benefício) */
-    .box-subst { background-color: #fef9c3; border-radius: 4px; padding: 6px 10px; margin-bottom: 6px; font-size: 8.2pt; color: #713f12; line-height: 1.35; }
-    .box-beneficio { background-color: #f1f5f9; border-radius: 4px; padding: 6px 10px; font-size: 8.2pt; color: #334155; line-height: 1.35; }
-    
-    /* Bloco Inferior: Calorias e Observações */
-    .pdf-footer-box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; margin-top: 10px; margin-bottom: 12px; page-break-inside: avoid; }
-    .pdf-footer-box h4 { font-size: 8.5pt; color: #2c7a78; font-weight: 800; margin-bottom: 4px; text-transform: uppercase; }
-    .pdf-footer-box p { font-size: 8pt; color: #475569; line-height: 1.35; margin-bottom: 3px; }
-    
-    /* Assinatura e QR Code */
-    .pdf-bottom-signature { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; page-break-inside: avoid; }
-    .qr-code-box { display: flex; align-items: center; gap: 10px; }
-    #qrcode img, #qrcode canvas { width: 55px !important; height: 55px !important; }
-    .qr-text { font-size: 7.5pt; color: #64748b; max-width: 150px; line-height: 1.25; }
-    
-    .nutri-sig { text-align: right; }
-    .nutri-name { font-weight: 800; color: #2c7a78; font-size: 9.5pt; }
-    .nutri-crn { font-size: 8pt; color: #475569; }
-    .nutri-ref { font-size: 7pt; color: #94a3b8; margin-top: 2px; }
+    header {
+      width: 100%;
+      max-width: 900px;
+      background: #fff6e7;
+      border: 1px solid #f07870;
+      border-radius: 4px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .logo-img {
+      height: 45px;
+      object-fit: contain;
+    }
+
+    .menu-btn {
+      background-color: #a556f1;
+      color: white;
+      border: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .main-layout {
+      display: flex;
+      gap: 20px;
+      max-width: 900px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .card-left {
+      background: white;
+      border: 1px solid #dcdcdc;
+      border-radius: 12px;
+      padding: 12px;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .card-img-wrapper {
+      width: 100%;
+      height: 220px;
+      border: 1.5px solid #8183fb;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .validation-box {
+      flex: 1;
+      background: white;
+      border: 1px solid #b5b5b5;
+      border-radius: 8px;
+      padding: 24px;
+      min-width: 280px;
+    }
+
+    .search-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .input-code {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #707070;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .btn-submit {
+      background-color: #a556f1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-submit:hover {
+      background-color: #8e3ee0;
+    }
+
+    .result-card {
+      padding: 15px;
+      border-radius: 6px;
+    }
+
+    .result-success {
+      background-color: #eaf8e9;
+      border: 1px solid #a8e0a7;
+      color: #1b5e20;
+    }
+
+    .result-error {
+      background-color: #ffffee;
+      border: 1px solid #ef9a9a;
+      color: #c62828;
+    }
+
+    .btn-download-pdf {
+      margin-top: 15px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .btn-download-pdf:hover {
+      background-color: #1b5e20;
+    }
+
+    /* ESTILOS DO TEMPLATE DO PDF OCULTO */
+    #pdf-container-wrapper {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+    }
+
+    .pdf-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm;
+      background: #ffffff;
+      font-family: Arial, sans-serif;
+      color: #333333;
+      box-sizing: border-box;
+    }
+
+    .pdf-banner {
+      background-color: #1a5d57;
+      color: #ffffff;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .pdf-banner h1 {
+      font-size: 16pt;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .pdf-patient {
+      font-size: 11pt;
+      opacity: 0.95;
+      margin-top: 4px;
+    }
+
+    .pdf-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      page-break-inside: avoid;
+    }
+
+    .pdf-card-header {
+      color: #1a5d57;
+      font-size: 9pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .pdf-card-title {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #1a202c;
+      margin-bottom: 8px;
+    }
+
+    .pdf-card-body {
+      font-size: 9.5pt;
+      line-height: 1.4;
+      color: #4a5568;
+    }
+
+    .pdf-badge {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 9pt;
+      margin-top: 8px;
+      line-height: 1.3;
+    }
+
+    .pdf-badge-topping {
+      color: #1a5d57;
+      font-weight: 500;
+    }
+
+    .pdf-badge-subst {
+      background-color: #fefcbf;
+      color: #744210;
+    }
+
+    .pdf-badge-benefit {
+      background-color: #edf2f7;
+      color: #2d3748;
+    }
+
+    .pdf-footer {
+      margin-top: 30px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      page-break-inside: avoid;
+    }
+
+    .pdf-nutri-info {
+      font-size: 8.5pt;
+      color: #4a5568;
+      line-height: 1.4;
+    }
+
+    .pdf-nutri-name {
+      color: #1a5d57;
+      font-weight: bold;
+      font-size: 10pt;
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <a href="index.html"><img src="nutriLogo.png" class="logo-img" alt="Nutri Félix"></a>
-    <button class="menu-btn">&#9776;</button>
+    <img src="nutriLogo.png" alt="Nutri Félix" class="logo-img" onerror="this.src='https://via.placeholder.com/120x45?text=Nutri+Felix'">
+    <button class="menu-btn">☰</button>
   </header>
 
-  <main class="main-layout">
+  <div class="main-layout">
     <div class="card-left">
-      <div class="card-img-wrapper"><img src="1785022150778(1)(1).png" class="card-img" alt="App Preview"></div>
-      <span class="card-title">Meu App</span>
+      <div class="card-img-wrapper">
+        <img src="nutricci.png" alt="Meu App" class="card-img" onerror="this.src='https://via.placeholder.com/180x220?text=App'">
+      </div>
+      <div class="card-title">Meu App</div>
     </div>
 
     <div class="validation-box">
-      <form id="validateForm" class="search-form">
-        <input type="text" id="codigoInput" class="input-code" placeholder="Digite aqui o código do seu cardápio" required>
-        <button type="submit" class="btn-submit">Validar</button>
-      </form>
-      <div id="statusContainer" class="status-container"></div>
-    </div>
-  </main>
-
-  <div id="pdf-wrapper">
-    <div id="pdfContent" class="pdf-container">
-      
-      <div class="pdf-banner">
-        <h1>Plano Alimentar Personalizado</h1>
-        <div class="pdf-patient">Paciente: <span id="pdfPacienteName">Carregando...</span></div>
-        <div class="pdf-sub">Nutri Master | Nutri Félix</div>
+      <div class="search-form">
+        <input type="text" id="inputDocId" class="input-code" placeholder="Cole aqui o ID do Cardápio...">
+        <button class="btn-submit" onclick="onClickValidar()">Validar</button>
       </div>
 
-      <div id="pdfMealsList"></div>
-
-      <div class="pdf-footer-box">
-        <p><strong>VALOR ENERGÉTICO TOTAL:</strong> <span id="pdfCalorias">1350</span> kcal</p>
-        <h4 style="margin-top: 6px;">OBSERVAÇÕES E ORIENTAÇÕES</h4>
-        <p id="pdfAlertas">Sua dedicação é o melhor ingrediente para uma vida com mais saúde e vitalidade.</p>
-        <p id="pdfEncerramento" style="margin-top: 4px; font-style: italic;"></p>
-      </div>
-
-      <div class="pdf-bottom-signature">
-        <div class="qr-code-box">
-          <div id="qrcode"></div>
-          <div class="qr-text">
-            Acesse www.nutrifelix.com.br ou escaneie o QR Code para validar este cardápio.
-          </div>
-        </div>
-        <div class="nutri-sig">
-          <p class="nutri-name">Christina Félix da Silva</p>
-          <p class="nutri-crn">Nutricionista — CRN3-73810 Fito 0640</p>
-          <p class="nutri-ref">Ref. Cardápio: <span id="pdfDocId"></span></p>
-        </div>
-      </div>
-
+      <div id="statusContainer"></div>
     </div>
   </div>
 
+  <div id="pdf-container-wrapper">
+    <div id="pdf-content" class="pdf-page">
+      </div>
+  </div>
+
   <script>
-    // Configuração do Firebase
+    // 1. Configuração do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4",
-      authDomain: "seu-projeto.firebaseapp.com",
+      apiKey: "AIzaSyDummyKeyForSecurity", // Opcional para leitura pública no Firestore
+      authDomain: "antares-7ebcb.firebaseapp.com",
       projectId: "antares-7ebcb",
-      storageBucket: "antares-7ebcb.firebasestorage.app",
-      messagingSenderId: "663101896650",
-      appId: "1:663101896650:web:7b23ff22cfd97a371b4133"
+      storageBucket: "antares-7ebcb.appspot.com",
+      messagingSenderId: "100000000000",
+      appId: "1:100000000000:web:000000000000"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
 
-    const form = document.getElementById('validateForm');
-    const input = document.getElementById('codigoInput');
-    const statusContainer = document.getElementById('statusContainer');
-
     let currentDocId = '';
+    let currentNomePaciente = 'Não informado';
 
+    // 2. Leitura da URL (ex: validar.html?id=rSN4xClq1NoyHSDVOPTI)
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const docId = urlParams.get('id');
+
+      if (docId) {
+        document.getElementById('inputDocId').value = docId;
+        validarCardapio(docId);
+      }
+    });
+
+    function onClickValidar() {
+      const id = document.getElementById('inputDocId').value.trim();
+      if (id) {
+        validarCardapio(id);
+      }
+    }
+
+    // 3. Função Principal de Validação e Consulta no Firestore
     async function validarCardapio(docId) {
       if (!docId) return;
       currentDocId = docId.trim();
 
+      const statusContainer = document.getElementById('statusContainer');
       statusContainer.innerHTML = '<p>Validando cardápio no sistema...</p>';
 
       try {
-        // 1. Busca no CardapioIA
+        // Consulta o documento na coleção CardapioIA
         const docRef = db.collection('CardapioIA').doc(currentDocId);
         const docSnap = await docRef.get();
 
         if (docSnap.exists) {
           const data = docSnap.data();
+          console.log("=== Dados da coleção CardapioIA ===", data);
+
           let cardapioObj = {};
           let nomePaciente = 'Não informado';
 
-          // 2. Busca nome do usuário na coleção 'users' pelo UID
-          const uid = data.userId || data.uid || data.idUser || data.user_id;
-          
-          if (uid) {
-            try {
-              const userSnap = await db.collection('users').doc(uid).get();
-              if (userSnap.exists && userSnap.data().display_name) {
-                nomePaciente = userSnap.data().display_name;
-              }
-            } catch (errUser) {
-              console.warn("Erro ao consultar coleção users:", errUser);
+          // Extração da referência do usuário (trata userID, user_id, user, etc.)
+          let rawUid = data.userID || data.user_id || data.userId || data.uid || data.user;
+          let uid = '';
+
+          if (rawUid) {
+            if (typeof rawUid === 'object' && rawUid.id) {
+              uid = rawUid.id;
+            } else if (typeof rawUid === 'string') {
+              uid = rawUid.includes('/') ? rawUid.split('/').pop() : rawUid;
             }
           }
 
-          // Fallbacks de nome
-          if (nomePaciente === 'Não informado') {
-            nomePaciente = data.paciente || data.display_name || data.nome || 'Não informado';
+          console.log("UID extraído para busca no users:", uid);
+
+          // Busca o nome do usuário na coleção 'users' com permissão Everyone
+          if (uid) {
+            try {
+              const userSnap = await db.collection('users').doc(uid).get();
+              if (userSnap.exists) {
+                const userData = userSnap.data();
+                console.log("=== Dados da coleção users ===", userData);
+                nomePaciente = userData.display_name || userData.nome || userData.name || 'Não informado';
+              } else {
+                console.warn(`Documento com ID ${uid} não localizado em 'users'.`);
+              }
+            } catch (errUser) {
+              console.error("Erro/Bloqueio ao ler coleção 'users':", errUser);
+            }
           }
 
-          // 3. Processa String JSON ou Objeto
+          currentNomePaciente = nomePaciente;
+
+          // Conversão da String JSON do Cardápio em Objeto JS
           if (typeof data.Cardapio === 'string') {
             try { 
               cardapioObj = JSON.parse(data.Cardapio); 
             } catch (e) { 
-              console.warn("Cardapio não é uma string JSON válida:", e);
+              console.error("Erro ao converter JSON do Cardapio:", e);
               cardapioObj = {}; 
             }
           } else if (typeof data.Cardapio === 'object' && data.Cardapio !== null) {
             cardapioObj = data.Cardapio;
           }
 
-          if (nomePaciente === 'Não informado' && cardapioObj.paciente) {
-            nomePaciente = cardapioObj.paciente;
-          }
-
-          let dataStr = '';
-          if (data.dataCardapio) {
-            const dt = data.dataCardapio.toDate ? data.dataCardapio.toDate() : new Date(data.dataCardapio.seconds * 1000);
-            dataStr = dt.toLocaleDateString('pt-BR');
-          }
-
-          // 4. Monta o PDF com o nome e os dados formatados
-          montarPDFTemplate(cardapioObj, currentDocId, nomePaciente);
+          // Monta o PDF dinamicamente
+          montarPDFTemplate(cardapioObj, currentDocId, currentNomePaciente);
 
           statusContainer.innerHTML = `
             <div class="result-card result-success">
               <h3 style="margin-bottom: 8px;">✓ Cardápio Válido e Autêntico!</h3>
-              <p><strong>Paciente:</strong> ${nomePaciente}</p>
-              <p><strong>ID:</strong> ${currentDocId}</p>
-              ${dataStr ? `<p><strong>Emitido em:</strong> ${dataStr}</p>` : ''}
+              <p><strong>Paciente:</strong> ${currentNomePaciente}</p>
+              <p><strong>ID do Cardápio:</strong> ${currentDocId}</p>
               <button class="btn-download-pdf" onclick="baixarPDF()">
                 📄 Baixar Cardápio em PDF
               </button>
@@ -233,118 +432,116 @@
           statusContainer.innerHTML = `
             <div class="result-card result-error">
               <h3>Cardápio não localizado</h3>
-              <p>O ID "<strong>${docId}</strong>" não consta em nosso sistema.</p>
+              <p>O ID "<strong>${docId}</strong>" não consta em nosso banco de dados.</p>
             </div>
           `;
         }
       } catch (error) {
-        console.error("Erro no Firestore:", error);
+        console.error("Erro ao validar cardápio:", error);
         statusContainer.innerHTML = `
           <div class="result-card result-error">
             <h3>Erro na Validação</h3>
-            <p>Ocorreu uma falha ao conectar ao banco de dados. Tente novamente.</p>
+            <p>Não foi possível conectar ao banco de dados. Tente novamente.</p>
           </div>
         `;
       }
     }
 
+    // 4. Montagem do Template do PDF com Selo de Validação
     function montarPDFTemplate(cardapio, docId, nomePaciente) {
-      document.getElementById('pdfDocId').innerText = docId;
-      document.getElementById('pdfPacienteName').innerText = nomePaciente || 'Não informado';
-      document.getElementById('pdfCalorias').innerText = cardapio.calorias || '1350';
-      
-      const orientacoes = cardapio.alerta_medico || 
-                          cardapio.observacoes || 
-                          (cardapio.recomendacoes ? cardapio.recomendacoes.nota : '') || 
-                          'Continue o acompanhamento regular com seu cardiologista e endocrinologista. Caso note qualquer alteração no trânsito intestinal com o aumento das fibras, ajuste a hidratação diária.';
-      
-      const encerramento = cardapio.mensagem_encerramento || 
-                           'Sua dedicação é o melhor ingrediente para uma vida com mais saúde e vitalidade. Estou à disposição para ajustes e acompanhamento. Vamos em frente com determinação!';
+      const pdfContainer = document.getElementById('pdf-content');
 
-      document.getElementById('pdfAlertas').innerText = orientacoes;
-      document.getElementById('pdfEncerramento').innerText = encerramento;
-
-      // Gerar QR Code Dinâmico
-      const qrcodeContainer = document.getElementById('qrcode');
-      qrcodeContainer.innerHTML = '';
-      const validationUrl = `https://www.nutrifelix.com.br/validar.html?codigo=${docId}`;
-      new QRCode(qrcodeContainer, {
-        text: validationUrl,
-        width: 55,
-        height: 55,
-        colorDark : "#2c7a78",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
-      });
-
-      // Renderização das Refeições
-      const mealsContainer = document.getElementById('pdfMealsList');
-      mealsContainer.innerHTML = '';
-
-      const refeicoes = cardapio.refeicoes || cardapio;
-
-      const listaRefeicoes = [
-        { key: 'cafe_manha', label: 'CAFÉ DA MANHÃ' },
-        { key: 'lanche_manha', label: 'LANCHE DA MANHÃ' },
-        { key: 'almoco', label: 'ALMOÇO' },
-        { key: 'lanche_tarde', label: 'LANCHE DA TARDE' },
-        { key: 'jantar', label: 'JANTAR' },
-        { key: 'ceia', label: 'CEIA' }
+      const refeicoesChaves = [
+        { key: 'cafe_manha', titulo: 'Café da Manhã' },
+        { key: 'lanche_manha', titulo: 'Lanche da Manhã' },
+        { key: 'almoco', titulo: 'Almoço' },
+        { key: 'lanche_tarde', titulo: 'Lanche da Tarde' },
+        { key: 'jantar', titulo: 'Jantar' },
+        { key: 'ceia', titulo: 'Ceia' }
       ];
 
-      listaRefeicoes.forEach(ref => {
-        const item = refeicoes[ref.key];
-        if (item) {
-          const prato = item.prato || 'Refeição Personalizada';
-          const preparo = item.preparo ? `<div class="meal-text"><strong>Preparo:</strong> ${item.preparo}</div>` : '';
-          const topping = item.topping ? `<div class="meal-topping">Topping / Dica: ${item.topping}</div>` : '';
-          const subst = item.substituicoes ? `<div class="box-subst"><strong>Substituições:</strong> ${item.substituicoes}</div>` : '';
-          const motivo = (item.motivo || item.beneficio) ? `<div class="box-beneficio"><strong>Benefício:</strong> ${item.motivo || item.beneficio}</div>` : '';
+      let refeicoesHtml = '';
 
-          const block = document.createElement('div');
-          block.className = 'meal-card';
-          block.innerHTML = `
-            <div class="meal-type">${ref.label}</div>
-            <div class="meal-prato">${prato}</div>
-            ${preparo}
-            ${topping}
-            ${subst}
-            ${motivo}
+      refeicoesChaves.forEach(ref => {
+        const item = cardapio[ref.key];
+        if (item) {
+          refeicoesHtml += `
+            <div class="pdf-card">
+              <div class="pdf-card-header">${ref.titulo}</div>
+              <div class="pdf-card-title">${item.prato || ''}</div>
+              <div class="pdf-card-body"><strong>Preparo:</strong> ${item.preparo || ''}</div>
+              
+              ${item.topping ? `<div class="pdf-badge pdf-badge-topping"><strong>Topping / Dica:</strong> ${item.topping}</div>` : ''}
+              ${item.substituicoes ? `<div class="pdf-badge pdf-badge-subst"><strong>Substituições:</strong> ${item.substituicoes}</div>` : ''}
+              ${item.motivo ? `<div class="pdf-badge pdf-badge-benefit"><strong>Benefício:</strong> ${item.motivo}</div>` : ''}
+            </div>
           `;
-          mealsContainer.appendChild(block);
         }
       });
+
+      const urlValidacao = `https://nutrifelix.com.br/validar.html?id=${docId}`;
+
+      pdfContainer.innerHTML = `
+        <div class="pdf-banner">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="background-color: rgba(255, 255, 255, 0.25); color: #ffffff; padding: 3px 8px; border-radius: 4px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">
+              ✓ CARDÁPIO VALIDADO
+            </span>
+            <span style="font-size: 8pt; opacity: 0.9;">Nutri Master | Nutri Félix</span>
+          </div>
+          <h1 style="margin-bottom: 2px;">PLANO ALIMENTAR PERSONALIZADO</h1>
+          <div class="pdf-patient">Paciente: <strong>${nomePaciente}</strong></div>
+        </div>
+
+        <div>
+          ${refeicoesHtml}
+        </div>
+
+        <div class="pdf-footer">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div id="qrcode-pdf"></div>
+            <div class="pdf-nutri-info">
+              <div class="pdf-nutri-name">Christina Félix da Silva</div>
+              <div>Nutricionista — CRN3-73810 Fito 0640</div>
+              <div style="font-size: 7.5pt; color: #718096; margin-top: 2px;">
+                Acesse nutrifelix.com.br ou escaneie o QR Code para validar este cardápio.<br>
+                Ref. Cardápio: ${docId}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Gerador do QR Code no PDF
+      setTimeout(() => {
+        const qrContainer = document.getElementById('qrcode-pdf');
+        if (qrContainer) {
+          qrContainer.innerHTML = '';
+          new QRCode(qrContainer, {
+            text: urlValidacao,
+            width: 65,
+            height: 65,
+            colorDark : "#1a5d57",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.M
+          });
+        }
+      }, 100);
     }
 
+    // 5. Download em PDF com html2pdf
     function baixarPDF() {
-      const element = document.getElementById('pdfContent');
-
+      const element = document.getElementById('pdf-content');
       const opt = {
-        margin:       [6, 6, 6, 6],
-        filename:     `Cardapio_NutriFelix_${currentDocId}.pdf`,
+        margin:       0,
+        filename:     `Cardapio_${currentNomePaciente.replace(/\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, logging: false, useCORS: true },
+        html2canvas:  { scale: 2, useCORS: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
       html2pdf().set(opt).from(element).save();
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const search = window.location.search;
-      if (search) {
-        const codigoParam = decodeURIComponent(search.substring(1).replace('codigo=', ''));
-        if (codigoParam) {
-          input.value = codigoParam;
-          validarCardapio(codigoParam);
-        }
-      }
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      validarCardapio(input.value);
-    });
   </script>
 </body>
 </html>
