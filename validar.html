@@ -9,11 +9,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   
-  <!-- Gerador de PDF no Navegador -->
+  <!-- Biblioteca para geração de PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
     body { background-color: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
     
     header { width: 100%; max-width: 900px; background: #fff8e7; border: 1px solid #707070; border-radius: 4px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
@@ -32,33 +32,29 @@
     .btn-submit { background-color: #5551f1; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; }
     
     .status-container { margin-top: 15px; font-size: 14px; }
-    .result-card { border-radius: 8px; padding: 20px; margin-top: 10px; }
-    .result-success { background-color: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; text-align: center; }
-    .result-error { background-color: #ffebee; border: 1px solid #ef9a9a; color: #c62828; }
+    .result-card { border-radius: 8px; padding: 20px; margin-top: 10px; text-align: center; }
+    .result-success { background-color: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
+    .result-error { background-color: #ffebee; border: 1px solid #ef9a9a; color: #c62828; text-align: left; }
     
     .btn-download-pdf { margin-top: 16px; background-color: #2e7d32; color: #ffffff; border: none; padding: 12px 24px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
     .btn-download-pdf:hover { background-color: #1b5e20; }
 
-    /* Layout Interno Oculto para Renderização do PDF */
-    /* Posiciona fora da tela em vez de usar display:none para o html2pdf ler o conteúdo */
-    #pdf-wrapper { 
-      position: absolute; 
-      left: -9999px; 
-      top: 0; 
-    }
-    .pdf-container { width: 210mm; background: #ffffff; padding: 18mm 15mm; color: #2d3748; font-size: 10.5pt; line-height: 1.4; }
-    .pdf-header { text-align: center; border-bottom: 2px solid #2e7d32; padding-bottom: 10px; margin-bottom: 14px; }
-    .pdf-header h1 { color: #2e7d32; font-size: 15pt; text-transform: uppercase; letter-spacing: 0.5px; }
-    .pdf-header p { font-size: 10.5pt; color: #4a5568; margin-top: 2px; }
+    /* Esconde o container do PDF fora da área visível mas mantendo dimensões para renderizar */
+    #pdf-wrapper { position: absolute; left: -9999px; top: 0; }
+    .pdf-container { width: 210mm; background: #ffffff; padding: 16mm 14mm; color: #2d3748; font-size: 9.5pt; line-height: 1.4; }
+    .pdf-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #2e7d32; padding-bottom: 10px; margin-bottom: 14px; }
+    .pdf-header-title h1 { color: #2e7d32; font-size: 15pt; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pdf-header-title p { font-size: 10pt; color: #4a5568; margin-top: 2px; }
+    .pdf-logo { width: 60px; height: 60px; object-fit: contain; }
     
     .meal-card { margin-bottom: 10px; padding: 8px 12px; background: #f8fafc; border-left: 4px solid #2e7d32; border-radius: 0 4px 4px 0; }
-    .meal-type { font-size: 10pt; font-weight: bold; color: #2e7d32; text-transform: uppercase; margin-bottom: 2px; }
-    .meal-prato { font-weight: bold; color: #1a202c; font-size: 10.5pt; }
-    .meal-info { margin-top: 3px; font-size: 9.5pt; color: #4a5568; }
+    .meal-type { font-size: 9.5pt; font-weight: bold; color: #2e7d32; text-transform: uppercase; margin-bottom: 2px; }
+    .meal-prato { font-weight: bold; color: #1a202c; font-size: 10pt; }
+    .meal-info { margin-top: 3px; font-size: 8.5pt; color: #4a5568; }
     
-    .pdf-footer { margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px; font-size: 9pt; color: #4a5568; }
+    .pdf-footer { margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px; font-size: 8.5pt; color: #4a5568; }
     .nutri-sig { margin-top: 12px; text-align: right; }
-    .nutri-name { font-weight: bold; color: #2e7d32; font-size: 10pt; }
+    .nutri-name { font-weight: bold; color: #2e7d32; font-size: 9.5pt; }
   </style>
 </head>
 <body>
@@ -83,25 +79,28 @@
     </div>
   </main>
 
-  <!-- Container oculta onde o PDF é estruturado em background para download -->
+  <!-- Container invisível renderizado na tela para a criação do PDF -->
   <div id="pdf-wrapper">
     <div id="pdfContent" class="pdf-container">
       <div class="pdf-header">
-        <h1>Plano Alimentar Personalizado</h1>
-        <p><strong id="pdfPaciente">Paciente: Validade do Sistema</strong></p>
-        <p style="font-size: 9pt; color: #718096; margin-top: 4px;">Nutri Master | Nutri Félix</p>
+        <div class="pdf-header-title">
+          <h1>Plano Alimentar Personalizado</h1>
+          <p><strong>Validação de Autenticidade</strong></p>
+          <p style="font-size: 8.5pt; color: #718096; margin-top: 2px;">Nutri Master | Nutri Félix</p>
+        </div>
+        <img src="nutriLogo.png" class="pdf-logo" alt="Logo Nutri Félix">
       </div>
 
       <div id="pdfMealsList"></div>
 
       <div class="pdf-footer">
-        <p><strong>VALOR ENERGÉTICO TOTAL:</strong> <span id="pdfCalorias">1350</span> kcal</p>
-        <p style="margin-top: 4px;" id="pdfAlertas"></p>
+        <p><strong>VALOR ENERGÉTICO TOTAL ESTIMADO:</strong> <span id="pdfCalorias">1350</span> kcal</p>
+        <p style="margin-top: 6px; font-style: italic;" id="pdfAlertas"></p>
         
         <div class="nutri-sig">
           <p class="nutri-name">Christina Félix da Silva</p>
           <p>Nutricionista — CRN3-73810 Fito 0640</p>
-          <p style="font-size: 8pt; color: #a0aec0; margin-top: 2px;">Ref. Cardápio: <span id="pdfDocId"></span></p>
+          <p style="font-size: 7.5pt; color: #a0aec0; margin-top: 2px;">Ref. Cardápio: <span id="pdfDocId"></span></p>
         </div>
       </div>
     </div>
@@ -140,15 +139,15 @@
           const data = docSnap.data();
           let cardapioObj = {};
 
-          // Faz o parse seguro da String JSON do Firestore
+          // Tratamento para ler tanto se vier como String JSON quanto se já for Objeto do Firestore
           if (typeof data.Cardapio === 'string') {
             try { 
               cardapioObj = JSON.parse(data.Cardapio); 
             } catch (e) { 
-              console.error("Erro ao analisar JSON do Cardapio:", e);
+              console.warn("Cardapio não é uma string JSON válida:", e);
               cardapioObj = {}; 
             }
-          } else if (typeof data.Cardapio === 'object') {
+          } else if (typeof data.Cardapio === 'object' && data.Cardapio !== null) {
             cardapioObj = data.Cardapio;
           }
 
@@ -158,7 +157,7 @@
             dataStr = dt.toLocaleDateString('pt-BR');
           }
 
-          // Monta o template do PDF com os dados lidos
+          // Monta o template do PDF com as informações capturadas
           montarPDFTemplate(cardapioObj, currentDocId);
 
           statusContainer.innerHTML = `
@@ -185,7 +184,7 @@
         statusContainer.innerHTML = `
           <div class="result-card result-error">
             <h3>Erro na Validação</h3>
-            <p>Não foi possível conectar ao banco de dados.</p>
+            <p>Ocorreu uma falha ao conectar ao banco de dados. Tente novamente.</p>
           </div>
         `;
       }
@@ -195,13 +194,17 @@
       document.getElementById('pdfDocId').innerText = docId;
       document.getElementById('pdfCalorias').innerText = cardapio.calorias || '1350';
       
-      const observacao = cardapio.mensagem_encerramento || cardapio.alerta_medico || cardapio.observacoes || 'Sua dedicação é o melhor ingrediente para uma vida com mais saúde e vitalidade.';
+      const observacao = cardapio.mensagem_encerramento || 
+                         cardapio.alerta_medico || 
+                         cardapio.observacoes || 
+                         (cardapio.recomendacoes ? cardapio.recomendacoes.nota : '') || 
+                         'Sua dedicação é o melhor ingrediente para uma vida com mais saúde e vitalidade.';
+      
       document.getElementById('pdfAlertas').innerText = observacao;
 
       const mealsContainer = document.getElementById('pdfMealsList');
       mealsContainer.innerHTML = '';
 
-      // Mapeia o objeto refeicoes dentro do JSON retornado pelo Firestore
       const refeicoes = cardapio.refeicoes || cardapio;
 
       const listaRefeicoes = [
@@ -209,7 +212,8 @@
         { key: 'lanche_manha', label: 'LANCHE DA MANHÃ' },
         { key: 'almoco', label: 'ALMOÇO' },
         { key: 'lanche_tarde', label: 'LANCHE DA TARDE' },
-        { key: 'jantar', label: 'JANTAR' }
+        { key: 'jantar', label: 'JANTAR' },
+        { key: 'ceia', label: 'CEIA' }
       ];
 
       listaRefeicoes.forEach(ref => {
@@ -217,15 +221,21 @@
         if (item) {
           const prato = item.prato || 'Refeição Personalizada';
           const preparo = item.preparo ? `<div><strong>Preparo:</strong> ${item.preparo}</div>` : '';
+          const topping = item.topping ? `<div><strong>Dica / Topping:</strong> ${item.topping}</div>` : '';
           const subst = item.substituicoes ? `<div><strong>Substituições:</strong> ${item.substituicoes}</div>` : '';
-          const topping = item.topping ? `<div><strong>Dica/Topping:</strong> ${item.topping}</div>` : '';
+          const motivo = item.motivo ? `<div><strong>Benefício:</strong> ${item.motivo}</div>` : '';
 
           const block = document.createElement('div');
           block.className = 'meal-card';
           block.innerHTML = `
             <div class="meal-type">${ref.label}</div>
             <div class="meal-prato">${prato}</div>
-            <div class="meal-info">${preparo}${topping}${subst}</div>
+            <div class="meal-info">
+              ${preparo}
+              ${topping}
+              ${subst}
+              ${motivo}
+            </div>
           `;
           mealsContainer.appendChild(block);
         }
@@ -236,7 +246,7 @@
       const element = document.getElementById('pdfContent');
 
       const opt = {
-        margin:       [10, 10, 10, 10],
+        margin:       [8, 10, 8, 10],
         filename:     `Cardapio_NutriFelix_${currentDocId}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, logging: false, useCORS: true },
@@ -262,4 +272,5 @@
       validarCardapio(input.value);
     });
   </script>
+</body>
 </html>
