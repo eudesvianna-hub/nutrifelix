@@ -40,7 +40,12 @@
     .btn-download-pdf:hover { background-color: #1b5e20; }
 
     /* Layout Interno Oculto para Renderização do PDF */
-    #pdf-wrapper { display: none; }
+    /* Posiciona fora da tela em vez de usar display:none para o html2pdf ler o conteúdo */
+    #pdf-wrapper { 
+      position: absolute; 
+      left: -9999px; 
+      top: 0; 
+    }
     .pdf-container { width: 210mm; background: #ffffff; padding: 18mm 15mm; color: #2d3748; font-size: 10.5pt; line-height: 1.4; }
     .pdf-header { text-align: center; border-bottom: 2px solid #2e7d32; padding-bottom: 10px; margin-bottom: 14px; }
     .pdf-header h1 { color: #2e7d32; font-size: 15pt; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -119,7 +124,6 @@
     const input = document.getElementById('codigoInput');
     const statusContainer = document.getElementById('statusContainer');
 
-    let rawCardapioData = null;
     let currentDocId = '';
 
     async function validarCardapio(docId) {
@@ -134,12 +138,18 @@
 
         if (docSnap.exists) {
           const data = docSnap.data();
-          
-          // Trata campo Cardapio (se vier como String JSON ou Objeto)
+          let cardapioObj = {};
+
+          // Faz o parse seguro da String JSON do Firestore
           if (typeof data.Cardapio === 'string') {
-            try { rawCardapioData = JSON.parse(data.Cardapio); } catch (e) { rawCardapioData = {}; }
-          } else {
-            rawCardapioData = data.Cardapio || {};
+            try { 
+              cardapioObj = JSON.parse(data.Cardapio); 
+            } catch (e) { 
+              console.error("Erro ao analisar JSON do Cardapio:", e);
+              cardapioObj = {}; 
+            }
+          } else if (typeof data.Cardapio === 'object') {
+            cardapioObj = data.Cardapio;
           }
 
           let dataStr = '';
@@ -148,7 +158,8 @@
             dataStr = dt.toLocaleDateString('pt-BR');
           }
 
-          montarPDFTemplate(rawCardapioData, currentDocId);
+          // Monta o template do PDF com os dados lidos
+          montarPDFTemplate(cardapioObj, currentDocId);
 
           statusContainer.innerHTML = `
             <div class="result-card result-success">
@@ -183,12 +194,17 @@
     function montarPDFTemplate(cardapio, docId) {
       document.getElementById('pdfDocId').innerText = docId;
       document.getElementById('pdfCalorias').innerText = cardapio.calorias || '1350';
-      document.getElementById('pdfAlertas').innerText = cardapio.alerta_medico || cardapio.observacoes || 'Sua dedicação é o melhor ingrediente para uma vida com mais saúde e vitalidade.';
+      
+      const observacao = cardapio.mensagem_encerramento || cardapio.alerta_medico || cardapio.observacoes || 'Sua dedicação é o melhor ingrediente para uma vida com mais saúde e vitalidade.';
+      document.getElementById('pdfAlertas').innerText = observacao;
 
       const mealsContainer = document.getElementById('pdfMealsList');
       mealsContainer.innerHTML = '';
 
-      const refeicoesChaves = [
+      // Mapeia o objeto refeicoes dentro do JSON retornado pelo Firestore
+      const refeicoes = cardapio.refeicoes || cardapio;
+
+      const listaRefeicoes = [
         { key: 'cafe_manha', label: 'CAFÉ DA MANHÃ' },
         { key: 'lanche_manha', label: 'LANCHE DA MANHÃ' },
         { key: 'almoco', label: 'ALMOÇO' },
@@ -196,19 +212,20 @@
         { key: 'jantar', label: 'JANTAR' }
       ];
 
-      refeicoesChaves.forEach(ref => {
-        if (cardapio[ref.key]) {
-          const item = cardapio[ref.key];
+      listaRefeicoes.forEach(ref => {
+        const item = refeicoes[ref.key];
+        if (item) {
           const prato = item.prato || 'Refeição Personalizada';
           const preparo = item.preparo ? `<div><strong>Preparo:</strong> ${item.preparo}</div>` : '';
           const subst = item.substituicoes ? `<div><strong>Substituições:</strong> ${item.substituicoes}</div>` : '';
+          const topping = item.topping ? `<div><strong>Dica/Topping:</strong> ${item.topping}</div>` : '';
 
           const block = document.createElement('div');
           block.className = 'meal-card';
           block.innerHTML = `
             <div class="meal-type">${ref.label}</div>
             <div class="meal-prato">${prato}</div>
-            <div class="meal-info">${preparo}${subst}</div>
+            <div class="meal-info">${preparo}${topping}${subst}</div>
           `;
           mealsContainer.appendChild(block);
         }
@@ -217,21 +234,16 @@
 
     function baixarPDF() {
       const element = document.getElementById('pdfContent');
-      const wrapper = document.getElementById('pdf-wrapper');
-
-      wrapper.style.display = 'block';
 
       const opt = {
-        margin:       10,
+        margin:       [10, 10, 10, 10],
         filename:     `Cardapio_NutriFelix_${currentDocId}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
+        html2canvas:  { scale: 2, logging: false, useCORS: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      html2pdf().set(opt).from(element).save().then(() => {
-        wrapper.style.display = 'none';
-      });
+      html2pdf().set(opt).from(element).save();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -250,5 +262,4 @@
       validarCardapio(input.value);
     });
   </script>
-</body>
 </html>
