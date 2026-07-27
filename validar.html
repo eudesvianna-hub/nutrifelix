@@ -169,7 +169,7 @@
       background-color: #1b5e20;
     }
 
-    /* ESTILOS DO TEMPLATE DO PDF OCULTO */
+    /* ESTILOS DO PDF OCULTO */
     #pdf-container-wrapper {
       position: absolute;
       left: -9999px;
@@ -184,6 +184,20 @@
       font-family: Arial, sans-serif;
       color: #333333;
       box-sizing: border-box;
+    }
+
+    .pdf-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #1a5d57;
+      padding-bottom: 10px;
+    }
+
+    .pdf-logo {
+      height: 50px;
+      object-fit: contain;
     }
 
     .pdf-banner {
@@ -286,14 +300,14 @@
 <body>
 
   <header>
-    <img src="nutriLogo.png" alt="Nutri Félix" class="logo-img" onerror="this.src='https://via.placeholder.com/120x45?text=Nutri+Felix'">
+    <img src="https://nutrifelix.com.br/nutriLogo.png" alt="Nutri Félix" class="logo-img" onerror="this.src='nutriLogo.png'">
     <button class="menu-btn">☰</button>
   </header>
 
   <div class="main-layout">
     <div class="card-left">
       <div class="card-img-wrapper">
-        <img src="nutricci.png" alt="Meu App" class="card-img" onerror="this.src='https://via.placeholder.com/180x220?text=App'">
+        <img src="https://nutrifelix.com.br/nutricci.png" alt="Meu App" class="card-img" onerror="this.src='nutricci.png'">
       </div>
       <div class="card-title">Meu App</div>
     </div>
@@ -309,19 +323,19 @@
   </div>
 
   <div id="pdf-container-wrapper">
-    <div id="pdf-content" class="pdf-page">
-      </div>
+    <div id="pdf-content" class="pdf-page"></div>
   </div>
 
   <script>
     // 1. Configuração do Firebase
+    // ATENÇÃO: Substitua 'SUA_API_KEY_REAL_AQUI' pela apiKey encontrada no Console do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyDummyKeyForSecurity", // Opcional para leitura pública no Firestore
+      apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4", 
       authDomain: "antares-7ebcb.firebaseapp.com",
       projectId: "antares-7ebcb",
       storageBucket: "antares-7ebcb.appspot.com",
-      messagingSenderId: "100000000000",
-      appId: "1:100000000000:web:000000000000"
+      messagingSenderId: "663101896650",
+      appId: "1:663101896650:web:7b23ff22cfd97a371b4133"
     };
 
     if (!firebase.apps.length) {
@@ -332,7 +346,7 @@
     let currentDocId = '';
     let currentNomePaciente = 'Não informado';
 
-    // 2. Leitura da URL (ex: validar.html?id=rSN4xClq1NoyHSDVOPTI)
+    // 2. Leitura da URL ao carregar
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const docId = urlParams.get('id');
@@ -350,7 +364,7 @@
       }
     }
 
-    // 3. Função Principal de Validação e Consulta no Firestore
+    // 3. Função Principal de Consulta no Firestore
     async function validarCardapio(docId) {
       if (!docId) return;
       currentDocId = docId.trim();
@@ -360,61 +374,60 @@
 
       try {
         // Consulta o documento na coleção CardapioIA
-        const docRef = db.collection('CardapioIA').doc(currentDocId);
-        const docSnap = await docRef.get();
+        const docSnap = await db.collection('CardapioIA').doc(currentDocId).get();
 
         if (docSnap.exists) {
           const data = docSnap.data();
-          console.log("=== Dados da coleção CardapioIA ===", data);
+          console.log("=== CardapioIA Encontrado ===", data);
 
           let cardapioObj = {};
           let nomePaciente = 'Não informado';
 
-          // Extração da referência do usuário (trata userID, user_id, user, etc.)
+          // Extrai a referência do campo 'userID'
           let rawUid = data.userID || data.user_id || data.userId || data.uid || data.user;
           let uid = '';
 
           if (rawUid) {
             if (typeof rawUid === 'object' && rawUid.id) {
-              uid = rawUid.id;
+              uid = rawUid.id; // Se for um DocumentReference do Firestore
             } else if (typeof rawUid === 'string') {
-              uid = rawUid.includes('/') ? rawUid.split('/').pop() : rawUid;
+              uid = rawUid.includes('/') ? rawUid.split('/').pop() : rawUid; // Se for string '/users/UID'
             }
           }
 
-          console.log("UID extraído para busca no users:", uid);
+          console.log("UID extraído:", uid);
 
-          // Busca o nome do usuário na coleção 'users' com permissão Everyone
+          // Busca o nome na coleção 'users'
           if (uid) {
             try {
               const userSnap = await db.collection('users').doc(uid).get();
               if (userSnap.exists) {
                 const userData = userSnap.data();
-                console.log("=== Dados da coleção users ===", userData);
+                console.log("=== Dados do Usuário ===", userData);
                 nomePaciente = userData.display_name || userData.nome || userData.name || 'Não informado';
               } else {
-                console.warn(`Documento com ID ${uid} não localizado em 'users'.`);
+                console.warn(`Documento ${uid} não encontrado na coleção 'users'.`);
               }
             } catch (errUser) {
-              console.error("Erro/Bloqueio ao ler coleção 'users':", errUser);
+              console.error("Erro ao ler coleção 'users':", errUser);
             }
           }
 
           currentNomePaciente = nomePaciente;
 
-          // Conversão da String JSON do Cardápio em Objeto JS
+          // Faz o parse do JSON do cardápio se necessário
           if (typeof data.Cardapio === 'string') {
             try { 
               cardapioObj = JSON.parse(data.Cardapio); 
             } catch (e) { 
-              console.error("Erro ao converter JSON do Cardapio:", e);
+              console.error("Erro no JSON.parse:", e);
               cardapioObj = {}; 
             }
           } else if (typeof data.Cardapio === 'object' && data.Cardapio !== null) {
             cardapioObj = data.Cardapio;
           }
 
-          // Monta o PDF dinamicamente
+          // Monta o layout do PDF com os dados
           montarPDFTemplate(cardapioObj, currentDocId, currentNomePaciente);
 
           statusContainer.innerHTML = `
@@ -437,17 +450,17 @@
           `;
         }
       } catch (error) {
-        console.error("Erro ao validar cardápio:", error);
+        console.error("Erro geral na validação:", error);
         statusContainer.innerHTML = `
           <div class="result-card result-error">
             <h3>Erro na Validação</h3>
-            <p>Não foi possível conectar ao banco de dados. Tente novamente.</p>
+            <p>Não foi possível conectar ao banco de dados. Verifique a API Key do Firebase.</p>
           </div>
         `;
       }
     }
 
-    // 4. Montagem do Template do PDF com Selo de Validação
+    // 4. Montagem do PDF
     function montarPDFTemplate(cardapio, docId, nomePaciente) {
       const pdfContainer = document.getElementById('pdf-content');
 
@@ -482,6 +495,10 @@
       const urlValidacao = `https://nutrifelix.com.br/validar.html?id=${docId}`;
 
       pdfContainer.innerHTML = `
+        <div class="pdf-header-top">
+          <img src="https://nutrifelix.com.br/nutriLogo.png" alt="Nutri Félix Logo" class="pdf-logo" onerror="this.src='nutriLogo.png'">
+        </div>
+
         <div class="pdf-banner">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <span style="background-color: rgba(255, 255, 255, 0.25); color: #ffffff; padding: 3px 8px; border-radius: 4px; font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">
@@ -512,7 +529,6 @@
         </div>
       `;
 
-      // Gerador do QR Code no PDF
       setTimeout(() => {
         const qrContainer = document.getElementById('qrcode-pdf');
         if (qrContainer) {
@@ -529,7 +545,7 @@
       }, 100);
     }
 
-    // 5. Download em PDF com html2pdf
+    // 5. Download em PDF
     function baixarPDF() {
       const element = document.getElementById('pdf-content');
       const opt = {
