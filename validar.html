@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nutri Félix - Validar Cardápio</title>
   
+  <!-- Firebase SDK (v8) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+  <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
+  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -32,8 +35,8 @@
     header {
       width: 100%;
       max-width: 900px;
-      background: #fff6e7;
-      border: 1px solid #f07870;
+      background: #fff8e7;
+      border: 1px solid #707070;
       border-radius: 4px;
       padding: 12px 20px;
       display: flex;
@@ -43,7 +46,8 @@
     }
 
     .logo-img {
-      height: 45px;
+      width: 55px;
+      height: 55px;
       object-fit: contain;
     }
 
@@ -68,7 +72,7 @@
 
     .card-left {
       background: white;
-      border: 1px solid #dcdcdc;
+      border: 1px solid #c8c8c8;
       border-radius: 12px;
       padding: 12px;
       width: 200px;
@@ -81,7 +85,7 @@
     .card-img-wrapper {
       width: 100%;
       height: 220px;
-      border: 1.5px solid #8183fb;
+      border: 1.5px solid #8183f0;
       border-radius: 8px;
       overflow: hidden;
       margin-bottom: 15px;
@@ -97,6 +101,7 @@
       font-size: 14px;
       font-weight: 700;
       text-align: center;
+      color: #333;
     }
 
     .validation-box {
@@ -169,7 +174,7 @@
       background-color: #1b5e20;
     }
 
-    /* ESTILOS DO PDF OCULTO */
+    /* ESTILOS DO TEMPLATE DO PDF OCULTO */
     #pdf-container-wrapper {
       position: absolute;
       left: -9999px;
@@ -196,7 +201,7 @@
     }
 
     .pdf-logo {
-      height: 50px;
+      height: 55px;
       object-fit: contain;
     }
 
@@ -299,15 +304,17 @@
 </head>
 <body>
 
+  <!-- Cabeçalho Principal -->
   <header>
-    <img src="https://nutrifelix.com.br/nutriLogo.png" alt="Nutri Félix" class="logo-img" onerror="this.src='nutriLogo.png'">
-    <button class="menu-btn">☰</button>
+    <img src="nutriLogo.png" alt="Nutri Félix Logo" class="logo-img">
+    <button class="menu-btn">&#9776;</button>
   </header>
 
+  <!-- Layout Principal -->
   <div class="main-layout">
     <div class="card-left">
       <div class="card-img-wrapper">
-        <img src="https://nutrifelix.com.br/nutricci.png" alt="Meu App" class="card-img" onerror="this.src='nutricci.png'">
+        <img src="1785022150778(1)(1).png" alt="Meu App" class="card-img">
       </div>
       <div class="card-title">Meu App</div>
     </div>
@@ -322,15 +329,15 @@
     </div>
   </div>
 
+  <!-- Contêiner do PDF Oculto -->
   <div id="pdf-container-wrapper">
     <div id="pdf-content" class="pdf-page"></div>
   </div>
 
   <script>
-    // 1. Configuração do Firebase
-    // ATENÇÃO: Substitua 'SUA_API_KEY_REAL_AQUI' pela apiKey encontrada no Console do Firebase
+    // Configuração do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4", 
+      apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4", // Insira sua API Key do Firebase Console
       authDomain: "antares-7ebcb.firebaseapp.com",
       projectId: "antares-7ebcb",
       storageBucket: "antares-7ebcb.appspot.com",
@@ -346,7 +353,7 @@
     let currentDocId = '';
     let currentNomePaciente = 'Não informado';
 
-    // 2. Leitura da URL ao carregar
+    // Lê o parâmetro ?id= na URL do navegador
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const docId = urlParams.get('id');
@@ -364,7 +371,6 @@
       }
     }
 
-    // 3. Função Principal de Consulta no Firestore
     async function validarCardapio(docId) {
       if (!docId) return;
       currentDocId = docId.trim();
@@ -373,61 +379,48 @@
       statusContainer.innerHTML = '<p>Validando cardápio no sistema...</p>';
 
       try {
-        // Consulta o documento na coleção CardapioIA
         const docSnap = await db.collection('CardapioIA').doc(currentDocId).get();
 
         if (docSnap.exists) {
           const data = docSnap.data();
-          console.log("=== CardapioIA Encontrado ===", data);
-
           let cardapioObj = {};
           let nomePaciente = 'Não informado';
 
-          // Extrai a referência do campo 'userID'
-          let rawUid = data.userID || data.user_id || data.userId || data.uid || data.user;
+          // Extrai o ID do usuário do campo userID
+          let rawUid = data.userID || data.user_id || data.userId || data.uid;
           let uid = '';
 
           if (rawUid) {
             if (typeof rawUid === 'object' && rawUid.id) {
-              uid = rawUid.id; // Se for um DocumentReference do Firestore
+              uid = rawUid.id;
             } else if (typeof rawUid === 'string') {
-              uid = rawUid.includes('/') ? rawUid.split('/').pop() : rawUid; // Se for string '/users/UID'
+              uid = rawUid.includes('/') ? rawUid.split('/').pop() : rawUid;
             }
           }
 
-          console.log("UID extraído:", uid);
-
-          // Busca o nome na coleção 'users'
+          // Busca o nome do usuário na coleção 'users'
           if (uid) {
             try {
               const userSnap = await db.collection('users').doc(uid).get();
               if (userSnap.exists) {
                 const userData = userSnap.data();
-                console.log("=== Dados do Usuário ===", userData);
                 nomePaciente = userData.display_name || userData.nome || userData.name || 'Não informado';
-              } else {
-                console.warn(`Documento ${uid} não encontrado na coleção 'users'.`);
               }
             } catch (errUser) {
-              console.error("Erro ao ler coleção 'users':", errUser);
+              console.error("Erro na leitura de users:", errUser);
             }
           }
 
           currentNomePaciente = nomePaciente;
 
-          // Faz o parse do JSON do cardápio se necessário
+          // Parse da estrutura JSON do Cardápio
           if (typeof data.Cardapio === 'string') {
-            try { 
-              cardapioObj = JSON.parse(data.Cardapio); 
-            } catch (e) { 
-              console.error("Erro no JSON.parse:", e);
-              cardapioObj = {}; 
-            }
+            try { cardapioObj = JSON.parse(data.Cardapio); } catch (e) { cardapioObj = {}; }
           } else if (typeof data.Cardapio === 'object' && data.Cardapio !== null) {
             cardapioObj = data.Cardapio;
           }
 
-          // Monta o layout do PDF com os dados
+          // Renderiza o PDF
           montarPDFTemplate(cardapioObj, currentDocId, currentNomePaciente);
 
           statusContainer.innerHTML = `
@@ -450,17 +443,16 @@
           `;
         }
       } catch (error) {
-        console.error("Erro geral na validação:", error);
+        console.error("Erro na consulta:", error);
         statusContainer.innerHTML = `
           <div class="result-card result-error">
             <h3>Erro na Validação</h3>
-            <p>Não foi possível conectar ao banco de dados. Verifique a API Key do Firebase.</p>
+            <p>Não foi possível conectar ao banco de dados.</p>
           </div>
         `;
       }
     }
 
-    // 4. Montagem do PDF
     function montarPDFTemplate(cardapio, docId, nomePaciente) {
       const pdfContainer = document.getElementById('pdf-content');
 
@@ -496,7 +488,7 @@
 
       pdfContainer.innerHTML = `
         <div class="pdf-header-top">
-          <img src="https://nutrifelix.com.br/nutriLogo.png" alt="Nutri Félix Logo" class="pdf-logo" onerror="this.src='nutriLogo.png'">
+          <img src="nutriLogo.png" alt="Nutri Félix Logo" class="pdf-logo">
         </div>
 
         <div class="pdf-banner">
@@ -545,7 +537,6 @@
       }, 100);
     }
 
-    // 5. Download em PDF
     function baixarPDF() {
       const element = document.getElementById('pdf-content');
       const opt = {
