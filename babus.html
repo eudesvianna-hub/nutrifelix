@@ -92,23 +92,23 @@
             }
         }
 
-        .photo-card {
-            background: #fff;
-            border: 3px solid #4CAF50;
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 3 / 4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+       .photo-card {
+    background: #fff;
+    border: 3px solid #4CAF50;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Removido o aspect-ratio fixo para a borda abraçar a foto livremente */
+}
 
-        .photo-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
+.photo-card img {
+    width: 100%;
+    height: auto; /* Deixa a altura proporcional à largura da foto */
+    display: block;
+    object-fit: contain;
+}
     </style>
 </head>
 <body>
