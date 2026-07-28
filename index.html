@@ -34,9 +34,8 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            /* Ajustado para alinhar os itens à esquerda com espaço entre eles se necessário */
-            justify-content: flex-start; 
-            gap: 20px; /* Espaço fixo entre a logo e o texto */
+            justify-content: flex-start; /* Mudado para alinhar tudo à esquerda */
+            gap: 15px;
         }
 
         .topo-container img {
@@ -51,8 +50,7 @@
             font-size: 24px;
             color: #4a3b32;
             margin: 0;
-            text-align: left; /* Alinhado à esquerda */
-            flex-grow: 1;
+            text-align: left; /* Mudado para alinhar à esquerda */
         }
 
         /* Container dos 4 cards */
@@ -128,74 +126,30 @@
             display: block;
         }
 
-        /* ESTILOS DO FORMULÁRIO DENTRO DO IFRAME (validar.html) */
-        /* Estes estilos devem estar no arquivo validar.html, mas os coloco aqui como exemplo do que precisa mudar lá */
-        .form-container {
-            display: flex;
-            flex-direction: column; /* Padrão mobile: empilhado */
-            gap: 10px;
-            width: 90%;
-            margin: 20px auto;
-        }
-
-        .form-container input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%; /* Ocupa tudo no mobile */
-        }
-
-        .form-container button {
-            padding: 10px;
-            background-color: #1a535c; /* Cor do botão original */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            width: 100%; /* Ocupa tudo no mobile, evitando cortes */
-            cursor: pointer;
-        }
-
         /* RESPONSIVIDADE PARA CELULARES (Telas até 768px) */
         @media (max-width: 768px) {
-            /* Cabeçalho / Topo */
-            .topo-container {
-                gap: 8px; /* Reduz o gap no mobile */
-                padding: 8px;
-            }
-            .topo-frase {
-                font-size: 16px; /* Texto menor para o celular */
+            .cards-container {
+                gap: 8px; /* Reduz o espaço entre os cards para caberem 4 lado a lado */
             }
 
-            /* Cards */
-            .cards-container {
-                gap: 8px;
-            }
             .card {
-                width: calc(50% - 8px); /* 2 cards por linha no celular */
-                height: 220px;          /* Altura intermediária */
+                width: calc(25% - 8px); /* Deixa os 4 cards dividirem o espaço lado a lado */
+                height: 190px;          /* Reduz a altura proporcionalmente */
+                padding: 6px 4px;
             }
+
             .card img {
                 width: 100%;
-                height: 130px;
+                height: 105px;          /* Ajusta a imagem para caber no card menor */
             }
-            .card p {
-                font-size: 12px;       /* Texto ligeiramente maior que o original proporcional */
-            }
-        }
 
-        /* AJUSTES ESPECÍFICOS PARA TABLETS/DESKTOP (A partir de 769px) */
-        @media (min-width: 769px) {
-            /* O formulário dentro do iframe deve ficar em linha no desktop */
-            .form-container {
-                flex-direction: row; /* Botão ao lado do input */
-                align-items: center;
+            .card p {
+                font-size: 10.5px;      /* Aumentado em cerca de 50% em relação ao original proporcional */
+                font-weight: bold;
             }
-            .form-container input {
-                flex: 1; /* Input ocupa o espaço restante */
-                width: auto;
-            }
-            .form-container button {
-                width: auto; /* Botão assume o tamanho natural */
+
+            .topo-frase {
+                font-size: 18px;        /* Ajuste proporcional da frase no celular */
             }
         }
     </style>
