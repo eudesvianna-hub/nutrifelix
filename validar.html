@@ -175,225 +175,240 @@
     <div id="pdf-content" class="pdf-page"></div>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4",
-      authDomain: "seu-projeto.firebaseapp.com",
-      projectId: "antares-7ebcb",
-      storageBucket: "antares-7ebcb.firebasestorage.app",
-      messagingSenderId: "663101896650",
-      appId: "1:663101896650:web:7b23ff22cfd97a371b4133"
-    };
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4",
+    authDomain: "seu-projeto.firebaseapp.com",
+    projectId: "antares-7ebcb",
+    storageBucket: "antares-7ebcb.firebasestorage.app",
+    messagingSenderId: "663101896650",
+    appId: "1:663101896650:web:7b23ff22cfd97a371b4133"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-    const form = document.getElementById('validateForm');
-    const input = document.getElementById('codigoInput');
-    const statusContainer = document.getElementById('statusContainer');
+  const form = document.getElementById('validateForm');
+  const input = document.getElementById('codigoInput');
+  const statusContainer = document.getElementById('statusContainer');
 
-    let globalCardapioObj = null;
-    let globalDocId = '';
-    let globalNomePaciente = 'Não informado';
-    let globalDataCriacao = 'Não informada';
+  let globalCardapioObj = null;
+  let globalDocId = '';
+  let globalNomePaciente = 'Não informado';
+  let globalDataCriacao = 'Não informada';
 
-    async function validarCardapio(docId) {
-      if (!docId) return;
-      globalDocId = docId.trim();
+  async function validarCardapio(docId) {
+    if (!docId) return;
+    globalDocId = docId.trim();
 
-      statusContainer.innerHTML = '<p class="loading-spinner">Validando cardápio no sistema...</p>';
+    statusContainer.innerHTML = '<p class="loading-spinner">Validando cardápio no sistema...</p>';
 
-      try {
-        const docRef = db.collection('CardapioIA').doc(globalDocId);
-        const docSnap = await docRef.get();
+    try {
+      const docRef = db.collection('CardapioIA').doc(globalDocId);
+      const docSnap = await docRef.get();
 
-        if (docSnap.exists) {
-          const data = docSnap.data();
+      if (docSnap.exists) {
+        const data = docSnap.data();
 
-          // 1. Tratamento da Data do Cardápio
-          if (data.dataCardapio) {
-            const dateObj = data.dataCardapio.toDate ? data.dataCardapio.toDate() : new Date(data.dataCardapio.seconds * 1000);
-            globalDataCriacao = dateObj.toLocaleDateString('pt-BR');
-          } else if (data.created_at) {
-            const dateObj = data.created_at.toDate ? data.created_at.toDate() : new Date(data.created_at.seconds * 1000);
-            globalDataCriacao = dateObj.toLocaleDateString('pt-BR');
-          } else {
-            globalDataCriacao = new Date().toLocaleDateString('pt-BR');
-          }
-
-          // 2. Busca o Paciente na Coleção 'users'
-          let rawUid = data.userID || data.user_id || data.userId || data.uid;
-          let uid = '';
-          if (rawUid) {
-            uid = (typeof rawUid === 'object' && rawUid.id) ? rawUid.id : (typeof rawUid === 'string' && rawUid.includes('/') ? rawUid.split('/').pop() : rawUid);
-          }
-
-          if (uid) {
-            try {
-              const userSnap = await db.collection('users').doc(uid).get();
-              if (userSnap.exists) {
-                const uData = userSnap.data();
-                globalNomePaciente = uData.display_name || uData.nome || uData.name || 'Não informado';
-              }
-            } catch (errUser) {
-              console.error("Erro ao ler usuário:", errUser);
-            }
-          }
-
-          // 3. Extração do JSON do Cardápio
-          if (typeof data.Cardapio === 'string') {
-            try { globalCardapioObj = JSON.parse(data.Cardapio); } catch (e) { globalCardapioObj = {}; }
-          } else if (typeof data.Cardapio === 'object') {
-            globalCardapioObj = data.Cardapio;
-          }
-
-          // Monta o PDF internamente
-          montarPDF(globalCardapioObj, globalDocId, globalNomePaciente, globalDataCriacao);
-
-          // Renderiza a resposta positiva na tela
-          let html = '<div class="result-card result-success">';
-          html += '<div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">✓ Cardápio Válido e Autêntico!</div>';
-          html += `<p><strong>Paciente:</strong> ${globalNomePaciente}</p>`;
-          html += `<p><strong>ID do Cardápio:</strong> ${globalDocId}</p>`;
-          html += `<p><strong>Data de Emissão:</strong> ${globalDataCriacao}</p>`;
-          html += `<button class="btn-download-pdf" onclick="baixarPDF()">📄 Baixar Cardápio em PDF</button>`;
-          html += '</div>';
-
-          statusContainer.innerHTML = html;
-
+        // 1. Data do Cardápio
+        if (data.dataCardapio) {
+          const dateObj = data.dataCardapio.toDate ? data.dataCardapio.toDate() : new Date(data.dataCardapio.seconds * 1000);
+          globalDataCriacao = dateObj.toLocaleDateString('pt-BR');
+        } else if (data.created_at) {
+          const dateObj = data.created_at.toDate ? data.created_at.toDate() : new Date(data.created_at.seconds * 1000);
+          globalDataCriacao = dateObj.toLocaleDateString('pt-BR');
         } else {
-          statusContainer.innerHTML = `
-            <div class="result-card result-error">
-              <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Cardápio não localizado</div>
-              <p>O ID "<strong>${docId}</strong>" não consta em nosso sistema.</p>
-            </div>
-          `;
+          globalDataCriacao = new Date().toLocaleDateString('pt-BR');
         }
-      } catch (error) {
-        console.error("Erro ao buscar no Firestore:", error);
+
+        // 2. Busca do Paciente na Coleção 'users'
+        let rawUid = data.userID || data.user_id || data.userId || data.uid;
+        let uid = '';
+        if (rawUid) {
+          uid = (typeof rawUid === 'object' && rawUid.id) ? rawUid.id : (typeof rawUid === 'string' && rawUid.includes('/') ? rawUid.split('/').pop() : rawUid);
+        }
+
+        if (uid) {
+          try {
+            const userSnap = await db.collection('users').doc(uid).get();
+            if (userSnap.exists) {
+              const uData = userSnap.data();
+              globalNomePaciente = uData.display_name || uData.nome || uData.name || 'Não informado';
+            }
+          } catch (errUser) {
+            console.error("Erro ao ler usuário:", errUser);
+          }
+        }
+
+        // 3. Parser Inteligente do Cardápio
+        let rawCardapio = data.Cardapio;
+        if (typeof rawCardapio === 'string') {
+          try {
+            globalCardapioObj = JSON.parse(rawCardapio);
+          } catch (e) {
+            globalCardapioObj = rawCardapio;
+          }
+        } else {
+          globalCardapioObj = rawCardapio;
+        }
+
+        // Monta a estrutura visual do PDF
+        montarPDF(globalCardapioObj, globalDocId, globalNomePaciente, globalDataCriacao);
+
+        // Tela de resultado
+        let html = '<div class="result-card result-success">';
+        html += '<div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">✓ Cardápio Válido e Autêntico!</div>';
+        html += `<p><strong>Paciente:</strong> ${globalNomePaciente}</p>`;
+        html += `<p><strong>ID do Cardápio:</strong> ${globalDocId}</p>`;
+        html += `<p><strong>Data de Emissão:</strong> ${globalDataCriacao}</p>`;
+        html += `<button class="btn-download-pdf" onclick="baixarPDF()">📄 Baixar Cardápio em PDF</button>`;
+        html += '</div>';
+
+        statusContainer.innerHTML = html;
+
+      } else {
         statusContainer.innerHTML = `
           <div class="result-card result-error">
-            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Erro na Validação</div>
-            <p>Não foi possível conectar ao banco de dados.</p>
+            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Cardápio não localizado</div>
+            <p>O ID "<strong>${docId}</strong>" não consta em nosso sistema.</p>
           </div>
         `;
       }
-    }
-
-    function montarPDF(cardapio, docId, paciente, dataCriacao) {
-      const pdfContainer = document.getElementById('pdf-content');
-      const dataHoje = new Date().toLocaleDateString('pt-BR');
-
-      const refeicoesChaves = [
-        { key: 'cafe_manha', titulo: 'Café da Manhã' },
-        { key: 'lanche_manha', titulo: 'Lanche da Manhã' },
-        { key: 'almoco', titulo: 'Almoço' },
-        { key: 'lanche_tarde', titulo: 'Lanche da Tarde' },
-        { key: 'jantar', titulo: 'Jantar' },
-        { key: 'ceia', titulo: 'Ceia' }
-      ];
-
-      let refeicoesHtml = '';
-
-      if (cardapio) {
-        refeicoesChaves.forEach(ref => {
-          const item = cardapio[ref.key];
-          if (item) {
-            refeicoesHtml += `
-              <div class="pdf-card">
-                <div class="pdf-card-header">${ref.titulo}</div>
-                <div class="pdf-card-title">${item.prato || ''}</div>
-                <div class="pdf-card-body"><strong>Preparo:</strong> ${item.preparo || ''}</div>
-                ${item.topping ? `<div class="pdf-badge pdf-badge-benefit"><strong>Dica/Topping:</strong> ${item.topping}</div>` : ''}
-                ${item.substituicoes ? `<div class="pdf-badge pdf-badge-subst"><strong>Substituições:</strong> ${item.substituicoes}</div>` : ''}
-              </div>
-            `;
-          }
-        });
-      }
-
-      const urlValidacao = `https://nutrifelix.com.br/validar.html?id=${docId}`;
-
-      pdfContainer.innerHTML = `
-        <div class="pdf-banner">
-          <div class="pdf-banner-info">
-            <span style="font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">Plano Alimentar Autêntico</span>
-            <h1>PACIENTE: ${paciente.toUpperCase()}</h1>
-          </div>
-          <img src="nutriLogo.png" class="pdf-banner-logo" alt="Nutri Logo">
-        </div>
-
-        <div class="pdf-dates">
-          <div><strong>Data do Cardápio:</strong> ${dataCriacao}</div>
-          <div><strong>Data de Baixa (Download):</strong> ${dataHoje}</div>
-          <div><strong>Ref ID:</strong> ${docId}</div>
-        </div>
-
-        <div>
-          ${refeicoesHtml || '<p style="text-align:center; padding: 20px;">Conteúdo do cardápio em processamento.</p>'}
-        </div>
-
-        <div class="pdf-footer">
-          <div id="qrcode-pdf"></div>
-          <div style="font-size: 8.5pt; color: #4a5568; text-align: right;">
-            <div style="font-weight: bold; color: #1a5d57; font-size: 10pt;">Christina Félix da Silva</div>
-            <div>Nutricionista — CRN3-73810 Fito 0640</div>
-            <div style="font-size: 7.5pt; color: #718096; margin-top: 2px;">
-              Documento validado via nutrifelix.com.br
-            </div>
-          </div>
+    } catch (error) {
+      console.error("Erro ao buscar no Firestore:", error);
+      statusContainer.innerHTML = `
+        <div class="result-card result-error">
+          <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Erro na Validação</div>
+          <p>Não foi possível conectar ao banco de dados.</p>
         </div>
       `;
+    }
+  }
 
-      setTimeout(() => {
-        const qrContainer = document.getElementById('qrcode-pdf');
-        if (qrContainer) {
-          qrContainer.innerHTML = '';
-          new QRCode(qrContainer, {
-            text: urlValidacao,
-            width: 60,
-            height: 60,
-            colorDark : "#1a5d57",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.M
-          });
+  function montarPDF(cardapio, docId, paciente, dataCriacao) {
+    const pdfContainer = document.getElementById('pdf-content');
+    const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+    let refeicoesHtml = '';
+
+    // Mapeamento de nomes amigáveis para as refeições
+    const titulosRefeicoes = {
+      cafe_manha: 'Café da Manhã',
+      lanche_manha: 'Lanche da Manhã',
+      almoco: 'Almoço',
+      lanche_tarde: 'Lanche da Tarde',
+      jantar: 'Jantar',
+      ceia: 'Ceia'
+    };
+
+    if (cardapio && typeof cardapio === 'object') {
+      // Varre todas as chaves recebidas no objeto do cardápio
+      Object.keys(cardapio).forEach(key => {
+        const item = cardapio[key];
+
+        // Ignora campos meta do JSON se houver
+        if (typeof item === 'object' && item !== null && (item.prato || item.preparo)) {
+          const tituloExibicao = titulosRefeicoes[key] || key.replace(/_/g, ' ').toUpperCase();
+
+          refeicoesHtml += `
+            <div class="pdf-card">
+              <div class="pdf-card-header">${tituloExibicao}</div>
+              <div class="pdf-card-title">${item.prato || ''}</div>
+              <div class="pdf-card-body"><strong>Preparo:</strong> ${item.preparo || ''}</div>
+              ${item.topping ? `<div class="pdf-badge pdf-badge-benefit"><strong>Dica / Topping:</strong> ${item.topping}</div>` : ''}
+              ${item.substituicoes ? `<div class="pdf-badge pdf-badge-subst"><strong>Substituições:</strong> ${item.substituicoes}</div>` : ''}
+              ${item.beneficio || item.motivo ? `<div class="pdf-card-body" style="margin-top:6px; font-style:italic;"><strong>Benefício:</strong> ${item.beneficio || item.motivo}</div>` : ''}
+            </div>
+          `;
         }
-      }, 100);
+      });
+    } else if (typeof cardapio === 'string') {
+      // Caso o cardápio venha em formato de texto simples/parágrafo
+      refeicoesHtml = `<div class="pdf-card"><div class="pdf-card-body" style="white-space: pre-wrap;">${cardapio}</div></div>`;
     }
 
-    function baixarPDF() {
-      const element = document.getElementById('pdf-content');
-      const opt = {
-        margin:       0,
-        filename:     `Cardapio_${globalNomePaciente.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
+    const urlValidacao = `https://nutrifelix.com.br/validar.html?id=${docId}`;
 
-      html2pdf().set(opt).from(element).save();
+    pdfContainer.innerHTML = `
+      <div class="pdf-banner">
+        <div class="pdf-banner-info">
+          <span style="font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">Plano Alimentar Autêntico</span>
+          <h1>PACIENTE: ${paciente.toUpperCase()}</h1>
+        </div>
+        <img src="nutriLogo.png" class="pdf-banner-logo" alt="Nutri Logo">
+      </div>
+
+      <div class="pdf-dates">
+        <div><strong>Data do Cardápio:</strong> ${dataCriacao}</div>
+        <div><strong>Data de Baixa:</strong> ${dataHoje}</div>
+        <div><strong>Ref ID:</strong> ${docId}</div>
+      </div>
+
+      <div>
+        ${refeicoesHtml || '<p style="text-align:center; padding: 20px;">Conteúdo do cardápio não formatado corretamente.</p>'}
+      </div>
+
+      <div class="pdf-footer">
+        <div id="qrcode-pdf"></div>
+        <div style="font-size: 8.5pt; color: #4a5568; text-align: right;">
+          <div style="font-weight: bold; color: #1a5d57; font-size: 10pt;">Christina Félix da Silva</div>
+          <div>Nutricionista — CRN3-73810 Fito 0640</div>
+          <div style="font-size: 7.5pt; color: #718096; margin-top: 2px;">
+            Documento validado via nutrifelix.com.br
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Renderiza o QR Code
+    setTimeout(() => {
+      const qrContainer = document.getElementById('qrcode-pdf');
+      if (qrContainer) {
+        qrContainer.innerHTML = '';
+        new QRCode(qrContainer, {
+          text: urlValidacao,
+          width: 60,
+          height: 60,
+          colorDark : "#1a5d57",
+          colorLight : "#ffffff",
+          correctLevel : QRCode.CorrectLevel.M
+        });
+      }
+    }, 100);
+  }
+
+  function baixarPDF() {
+    const element = document.getElementById('pdf-content');
+    const opt = {
+      margin:       0,
+      filename:     `Cardapio_${globalNomePaciente.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+  }
+
+  // Leitura automática da URL
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    let codigoParam = urlParams.get('id') || urlParams.get('codigo');
+
+    if (!codigoParam && window.location.search.length > 1) {
+      codigoParam = decodeURIComponent(window.location.search.substring(1));
     }
 
-    // Leitura universal do código da URL na inicialização
-    window.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      let codigoParam = urlParams.get('id') || urlParams.get('codigo');
+    if (codigoParam) {
+      input.value = codigoParam.trim();
+      validarCardapio(codigoParam.trim());
+    }
+  });
 
-      // Suporte para quando a URL vem formatada como ?CODIGO_DIRETO
-      if (!codigoParam && window.location.search.length > 1) {
-        codigoParam = decodeURIComponent(window.location.search.substring(1));
-      }
-
-      if (codigoParam) {
-        input.value = codigoParam.trim();
-        validarCardapio(codigoParam.trim());
-      }
-    });
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      validarCardapio(input.value.trim());
-    });
-  </script>
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    validarCardapio(input.value.trim());
+  });
+</script>
 </body>
 </html>
