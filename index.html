@@ -13,33 +13,43 @@
             text-align: center;
         }
 
-        /* Retângulo superior marrom clarinho alinhado à esquerda */
+        /* Container principal que centraliza o layout */
+        .wrapper-principal {
+            width: fit-content;
+            margin: 20px auto;
+        }
+
+        /* Retângulo superior marrom clarinho com a logo, com a largura exata dos 4 cards */
         .topo-container {
             background-color: #e8ded2;
-            padding: 10px 20px;
+            padding: 12px 20px;
             text-align: left;
             border-bottom: 1px solid #d4c5b9;
-            width: fit-content; /* Faz o retângulo ocupar apenas o espaço necessário */
-            min-width: 250px;
-            border-radius: 0 4px 4px 0;
-            margin-bottom: 20px;
+            width: 820px; /* Largura correspondente exata aos 4 cards */
+            max-width: 95vw;
+            box-sizing: border-box;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
         }
 
         .topo-container img {
             height: 45px;
-            cursor: pointer; /* Indica que é clicável para voltar ao início */
+            cursor: pointer; /* Clicar na logo volta ao início */
         }
 
-        /* Container dos 4 cards centralizado */
+        /* Container dos 4 cards */
         .cards-container {
             display: flex;
             justify-content: center;
             gap: 20px;
-            padding: 10px 20px;
             flex-wrap: wrap;
+            width: 820px; /* Mesma largura exata do topo */
+            max-width: 95vw;
         }
 
-        /* Medidas exatas do card: 180 de largura por 300 de altura */
+        /* Dimensões exatas do card: 180px de largura por 300px de altura */
         .card {
             background: #fff;
             border: 1px solid #ddd;
@@ -47,7 +57,7 @@
             width: 180px;
             height: 300px;
             text-align: center;
-            padding: 10px;
+            padding: 12px 8px;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: transform 0.2s;
@@ -55,93 +65,116 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
+            box-sizing: border-box;
         }
 
         .card:hover {
             transform: translateY(-5px);
         }
 
-        /* Imagens dentro dos cards: 150 de altura por 200 de largura */
+        /* Imagens retangulares e compridinhas */
         .card img {
-            width: 200px;
-            height: 150px;
-            max-width: 100%;
+            width: 160px;
+            height: 110px;
             object-fit: cover;
             border-radius: 4px;
+            margin-top: 5px;
         }
 
+        /* Espaçamento elegante entre a imagem e o nome */
         .card p {
-            margin: 10px 0 0 0;
+            margin: 0 0 10px 0;
             font-size: 14px;
             font-weight: bold;
             color: #333;
+            padding-top: 8px;
         }
 
-        /* PAINEL / IFRAME ABAIXO DOS CARDS */
+        /* PAINEL / IFRAME ABAIXO DOS CARDS SEM SCROLL E COM ALTURA DINÂMICA */
         #painel-validador {
             display: none; /* Oculto inicialmente */
-            width: 820px; /* Largura proporcional e alinhada aos 4 cards juntos */
-            max-width: 95%;
-            margin: 30px auto;
+            width: 820px; /* Mesma largura exata dos cards e do topo */
+            max-width: 95vw;
+            margin: 25px auto;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            overflow: hidden;
+            overflow: hidden; /* Garante que não apareça scroll externo */
             border: 1px solid #ccc;
+            box-sizing: border-box;
         }
 
         #iframe-validador {
             width: 100%;
-            height: 550px;
+            height: 100px; /* Altura inicial provisória antes do conteúdo carregar */
             border: none;
+            overflow: hidden; /* Remove o scroll interno do iframe */
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <div class="topo-container">
-        <img src="nutriLogo.png" alt="Nutri Félix Logo" onclick="voltarInicio()" title="Ir para a página inicial">
-    </div>
-
-    <div class="cards-container">
-        <div class="card" onclick="abrirSecao('nutri-felix')">
-            <img src="1785022150778(1)(1).png" alt="A Nutri Félix">
-            <p>A Nutri Félix</p>
+    <div class="wrapper-principal">
+        <div class="topo-container">
+            <img src="nutriLogo.png" alt="Nutri Félix Logo" onclick="voltarInicio()" title="Ir para a página inicial">
         </div>
 
-        <div class="card" onclick="carregarValidador()">
-            <img src="20260424_155202(1).jpg" alt="Meu App">
-            <p>Meu App</p>
+        <div class="cards-container">
+            <div class="card" onclick="abrirSecao('nutri.html')">
+                <img src="1785022150778(1)(1).png" alt="A Nutri Félix">
+                <p>A Nutri Félix</p>
+            </div>
+
+            <div class="card" onclick="carregarPaginaIframe('validar.html')">
+                <img src="20260424_155202(1).jpg" alt="Meu App">
+                <p>Meu App</p>
+            </div>
+
+            <div class="card" onclick="abrirSecao('van-nutri.html')">
+                <img src="lv_0_20260127193932(1).jpg" alt="A Nutri Félix">
+                <p>A Nutri Félix</p>
+            </div>
+
+            <div class="card" onclick="abrirSecao('nutricci.html')">
+                <img src="nutricci.png" alt="Para você">
+                <p>Para você</p>
+            </div>
         </div>
 
-        <div class="card" onclick="abrirSecao('van-nutri')">
-            <img src="lv_0_20260127193932(1).jpg" alt="A Nutri Félix">
-            <p>A Nutri Félix</p>
+        <div id="painel-validador">
+            <iframe id="iframe-validador" scrolling="no" src=""></iframe>
         </div>
-
-        <div class="card" onclick="abrirSecao('para-voce')">
-            <img src="nutricci.png" alt="Para você">
-            <p>Para você</p>
-        </div>
-    </div>
-
-    <div id="painel-validador">
-        <iframe id="iframe-validador" src=""></iframe>
     </div>
 
     <script>
-        // Função chamada ao clicar no segundo card ("Meu App")
-        function carregarValidador() {
+        // Função universal para abrir qualquer página no iframe com altura dinâmica automática
+        function carregarPaginaIframe(pagina) {
             const painel = document.getElementById('painel-validador');
             const iframe = document.getElementById('iframe-validador');
 
-            // Carrega o validar.html dentro do iframe alinhado
-            iframe.src = 'validar.html';
+            iframe.src = pagina;
             painel.style.display = 'block';
             
-            // Rola suavemente para o painel sem cobrir tudo de forma exagerada
+            // Rola suavemente para o painel
             painel.scrollIntoView({ behavior: 'smooth' });
         }
+
+        // Ajusta automaticamente a altura do iframe com base no conteúdo interno da página carregada
+        document.getElementById('iframe-validador').addEventListener('load', function() {
+            try {
+                const iframeDoc = this.contentDocument || this.contentWindow.document;
+                if (iframeDoc) {
+                    // Pega a altura real do conteúdo de dentro da página (ex: validar.html ou nutri.html)
+                    const alturaConteudo = iframeDoc.documentElement.scrollHeight || iframeDoc.body.scrollHeight;
+                    this.style.height = alturaConteudo + 'px';
+                }
+            } catch (e) {
+                console.log('Ajuste de altura automático via iframe (Cross-origin restrito se estiver rodando local sem servidor).');
+                // Fallback de segurança caso o navegador bloqueie por política de segurança local
+                this.style.height = '600px';
+            }
+        });
 
         // Função chamada ao clicar na logo da Nutri Félix (Botão Home)
         function voltarInicio() {
@@ -156,8 +189,9 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function abrirSecao(secao) {
-            console.log('Seção clicada: ' + secao);
+        function abrirSecao(paginaDestino) {
+            // Você pode usar esta mesma função para os outros cards no futuro
+            carregarPaginaIframe(paginaDestino);
         }
     </script>
 </body>
