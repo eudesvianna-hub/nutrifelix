@@ -270,70 +270,102 @@
   }
 
   // Função Universal para formatar o corpo do PDF sem perdas
-  function montarPDF(rawCardapio, docId, paciente, dataCriacao) {
+function montarPDF(rawCardapio, docId, paciente, dataCriacao) {
     const pdfContainer = document.getElementById('pdf-content');
     const dataHoje = new Date().toLocaleDateString('pt-BR');
     let conteudoHtml = '';
 
-    let parsed = rawCardapio;
+    let data = rawCardapio;
     if (typeof rawCardapio === 'string') {
       try {
-        parsed = JSON.parse(rawCardapio);
+        data = JSON.parse(rawCardapio);
       } catch (e) {
-        parsed = rawCardapio; // Mantém como texto puro caso não seja um JSON
+        data = rawCardapio;
       }
     }
 
-    // Se for um Objeto/JSON formatado
-    if (typeof parsed === 'object' && parsed !== null) {
-      Object.keys(parsed).forEach(key => {
-        const item = parsed[key];
-        const titulo = key.replace(/_/g, ' ').toUpperCase();
+    // Nomes amigáveis para as refeições
+    const nomesRefeicoes = {
+      cafe_manha: 'Café da Manhã',
+      lanche_manha: 'Lanche da Manhã',
+      almoco: 'Almoço',
+      lanche_tarde: 'Lanche da Tarde',
+      jantar: 'Jantar',
+      ceia: 'Ceia'
+    };
 
-        if (typeof item === 'object' && item !== null) {
+    if (typeof data === 'object' && data !== null) {
+      
+      // 1. BLOCO DE RECOMENDAÇÕES (BOAS-VINDAS)
+      if (data.recomendacoes) {
+        const rec = data.recomendacoes;
+        conteudoHtml += `
+          <div style="background:#f8fafc; border-left:4px solid #1a5d57; padding:12px 14px; border-radius:4px; margin-bottom:15px;">
+            ${rec.boas_vindas ? `<div style="font-size:9.5pt; color:#1e293b; margin-bottom:6px; font-weight:600;">${rec.boas_vindas}</div>` : ''}
+            ${rec.consideracoes ? `<div style="font-size:8.5pt; color:#475569; margin-bottom:4px;"><strong>Foco:</strong> ${rec.consideracoes}</div>` : ''}
+            ${rec.nota ? `<div style="font-size:8.5pt; color:#64748b; font-style:italic;">${rec.nota}</div>` : ''}
+          </div>
+        `;
+      }
+
+      // 2. BLOCO DE REFEIÇÕES
+      if (data.refeicoes && typeof data.refeicoes === 'object') {
+        conteudoHtml += `<div style="font-size:11pt; font-weight:bold; color:#1a5d57; margin-bottom:10px; border-bottom:2px solid #1a5d57; padding-bottom:3px;">PLANO ALIMENTAR DIÁRIO</div>`;
+
+        Object.keys(data.refeicoes).forEach(key => {
+          const ref = data.refeicoes[key];
+          const tituloRef = nomesRefeicoes[key] || key.replace(/_/g, ' ').toUpperCase();
+
           conteudoHtml += `
-            <div class="pdf-card" style="border:1px solid #e2e8f0; border-radius:6px; padding:12px; margin-bottom:10px;">
-              <div style="color:#1a5d57; font-weight:bold; font-size:10pt;">${titulo}</div>
-              <div style="font-weight:bold; font-size:11pt; margin:4px 0;">${item.prato || item.nome || ''}</div>
-              <div style="font-size:9.5pt; color:#4a5568;">${item.preparo || item.descricao || ''}</div>
-              ${item.topping ? `<div style="background:#f0fdf4; color:#166534; padding:4px 8px; font-size:8.5pt; margin-top:4px; border-radius:4px;"><strong>Dica:</strong> ${item.topping}</div>` : ''}
-              ${item.substituicoes ? `<div style="background:#fefcbf; color:#744210; padding:4px 8px; font-size:8.5pt; margin-top:4px; border-radius:4px;"><strong>Substituições:</strong> ${item.substituicoes}</div>` : ''}
+            <div style="border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; margin-bottom:12px; background:#ffffff; page-break-inside:avoid;">
+              <div style="color:#1a5d57; font-weight:bold; font-size:9.5pt; text-transform:uppercase; letter-spacing:0.5px;">${tituloRef}</div>
+              ${ref.prato ? `<div style="font-size:11pt; font-weight:bold; color:#0f172a; margin:4px 0 6px 0;">${ref.prato}</div>` : ''}
+              ${ref.preparo ? `<div style="font-size:9pt; color:#334155; line-height:1.4; margin-bottom:6px;"><strong>Preparo:</strong> ${ref.preparo}</div>` : ''}
+              ${ref.topping ? `<div style="background:#f0fdf4; color:#166534; padding:5px 8px; font-size:8.5pt; margin-top:4px; border-radius:4px; border-left:3px solid #22c55e;"><strong>Dica / Topping:</strong> ${ref.topping}</div>` : ''}
+              ${ref.substituicoes ? `<div style="background:#fefce8; color:#854d0e; padding:5px 8px; font-size:8.5pt; margin-top:4px; border-radius:4px; border-left:3px solid #eab308;"><strong>Substituições:</strong> ${ref.substituicoes}</div>` : ''}
+              ${ref.motivo ? `<div style="font-size:8.5pt; color:#64748b; margin-top:6px; font-style:italic;"><strong>Por que este alimento?</strong> ${ref.motivo}</div>` : ''}
             </div>
           `;
-        } else {
-          conteudoHtml += `
-            <div class="pdf-card" style="border:1px solid #e2e8f0; border-radius:6px; padding:12px; margin-bottom:10px;">
-              <div style="color:#1a5d57; font-weight:bold; font-size:10pt;">${titulo}</div>
-              <div style="font-size:9.5pt; color:#4a5568;">${item}</div>
-            </div>
-          `;
-        }
-      });
+        });
+      }
+
+      // 3. BLOCO DE CONSIDERAÇÕES FINAIS
+      if (data.consideracoes_finais) {
+        const fin = data.consideracoes_finais;
+        conteudoHtml += `
+          <div style="margin-top:15px; border:1px solid #cbd5e1; background:#f1f5f9; border-radius:8px; padding:12px; page-break-inside:avoid;">
+            ${fin.calorias ? `<div style="font-size:9pt; color:#0f172a; font-weight:bold; margin-bottom:4px;">Meta Calórica Estimada: ${fin.calorias} kcal</div>` : ''}
+            ${fin.alerta_medico ? `<div style="font-size:8.5pt; color:#334155; margin-bottom:6px;"><strong>Aviso Importante:</strong> ${fin.alerta_medico}</div>` : ''}
+            ${fin.mensagem_encerramento ? `<div style="font-size:9pt; color:#1a5d57; font-weight:bold; font-style:italic; text-align:center; margin-top:8px; padding-top:6px; border-top:1px dashed #cbd5e1;">"${fin.mensagem_encerramento}"</div>` : ''}
+          </div>
+        `;
+      }
+
     } else {
-      // Se for Texto Simples (String sem formato JSON)
-      conteudoHtml = `<div style="white-space: pre-wrap; font-size: 10pt; line-height: 1.5; color: #333;">${parsed}</div>`;
+      // Fallback caso não venha no formato JSON esperado
+      conteudoHtml = `<div style="white-space: pre-wrap; font-size: 9.5pt; line-height: 1.5; color: #333;">${data}</div>`;
     }
 
     const urlValidacao = `https://nutrifelix.com.br/validar.html?id=${docId}`;
 
     pdfContainer.innerHTML = `
-      <div class="pdf-banner" style="background:#1a5d57; color:white; padding:16px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <div style="background:#1a5d57; color:white; padding:14px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <div>
-          <span style="font-size:8pt; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">Plano Alimentar Autêntico</span>
-          <h1 style="font-size:14pt; margin-top:2px;">PACIENTE: ${paciente.toUpperCase()}</h1>
+          <span style="font-size:8pt; text-transform:uppercase; letter-spacing:1px; opacity:0.85;">Plano Alimentar Autêntico</span>
+          <h1 style="font-size:13pt; margin:2px 0 0 0; font-weight:bold;">PACIENTE: ${paciente.toUpperCase()}</h1>
         </div>
-        <img src="nutriLogo.png" style="height:45px; background:white; padding:4px; border-radius:4px;" alt="Logo">
+        <img src="nutriLogo.png" style="height:40px; background:white; padding:3px; border-radius:4px;" alt="Logo">
       </div>
 
-      <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 12px; border-radius:6px; margin-bottom:15px; font-size:8.5pt; color:#166534; display:flex; justify-content:space-between;">
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 12px; border-radius:6px; margin-bottom:12px; font-size:8.5pt; color:#166534; display:flex; justify-content:space-between;">
         <div><strong>Data do Cardápio:</strong> ${dataCriacao}</div>
         <div><strong>Emissão do PDF:</strong> ${dataHoje}</div>
-        <div><strong>ID:</strong> ${docId}</div>
+        <div><strong>Ref ID:</strong> ${docId}</div>
       </div>
 
       <div>${conteudoHtml}</div>
 
-      <div style="margin-top:25px; border-top:1px solid #e2e8f0; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="margin-top:20px; border-top:1px solid #e2e8f0; padding-top:10px; display:flex; justify-content:space-between; align-items:center; page-break-inside:avoid;">
         <div id="qrcode-pdf"></div>
         <div style="font-size:8.5pt; color:#4a5568; text-align:right;">
           <div style="font-weight:bold; color:#1a5d57;">Christina Félix da Silva</div>
@@ -358,7 +390,6 @@
       }
     }, 100);
   }
-
   function baixarPDF() {
     const element = document.getElementById('pdf-content');
     const opt = {
