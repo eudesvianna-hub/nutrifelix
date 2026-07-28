@@ -34,7 +34,7 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* Mudado para alinhar tudo à esquerda */
+            justify-content: flex-start;
             gap: 15px;
         }
 
@@ -50,7 +50,7 @@
             font-size: 24px;
             color: #4a3b32;
             margin: 0;
-            text-align: left; /* Mudado para alinhar à esquerda */
+            text-align: left;
         }
 
         /* Container dos 4 cards */
@@ -129,27 +129,27 @@
         /* RESPONSIVIDADE PARA CELULARES (Telas até 768px) */
         @media (max-width: 768px) {
             .cards-container {
-                gap: 8px; /* Reduz o espaço entre os cards para caberem 4 lado a lado */
+                gap: 8px;
             }
 
             .card {
-                width: calc(25% - 8px); /* Deixa os 4 cards dividirem o espaço lado a lado */
-                height: 190px;          /* Reduz a altura proporcionalmente */
+                width: calc(25% - 8px);
+                height: 190px;
                 padding: 6px 4px;
             }
 
             .card img {
                 width: 100%;
-                height: 105px;          /* Ajusta a imagem para caber no card menor */
+                height: 105px;
             }
 
             .card p {
-                font-size: 10.5px;      /* Aumentado em cerca de 50% em relação ao original proporcional */
+                font-size: 10.5px;
                 font-weight: bold;
             }
 
             .topo-frase {
-                font-size: 18px;        /* Ajuste proporcional da frase no celular */
+                font-size: 18px;
             }
         }
     </style>
@@ -194,6 +194,25 @@
             const iframe = document.getElementById('iframe-validador');
             iframe.src = pagina;
         }
+
+        // Ao carregar a página, verifica se veio algum parâmetro 'id' ou 'codigo' na URL principal (ex: nutrifelix.com.br/?id=XYZ)
+        window.addEventListener('DOMContentLoaded', () => {
+            const search = window.location.search;
+            if (search) {
+                const urlParams = new URLSearchParams(search);
+                let codigoParam = urlParams.get('id') || urlParams.get('codigo');
+
+                if (!codigoParam && search.length > 1) {
+                    codigoParam = decodeURIComponent(search.substring(1));
+                }
+
+                if (codigoParam) {
+                    // Carrega o validador dentro do iframe passando o ID direto na URL dele
+                    const iframe = document.getElementById('iframe-validador');
+                    iframe.src = `validar.html?id=${encodeURIComponent(codigoParam.trim())}`;
+                }
+            }
+        });
 
         document.getElementById('iframe-validador').addEventListener('load', function() {
             try {
