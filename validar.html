@@ -175,6 +175,9 @@
     <div id="pdf-content" class="pdf-page"></div>
   </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDQseJ1WXMOo-6HbSZ8euZGstspNABorA4",
@@ -192,186 +195,165 @@
   const input = document.getElementById('codigoInput');
   const statusContainer = document.getElementById('statusContainer');
 
-  let globalCardapioObj = null;
-  let globalDocId = '';
   let globalNomePaciente = 'Não informado';
   let globalDataCriacao = 'Não informada';
 
   async function validarCardapio(docId) {
     if (!docId) return;
-    globalDocId = docId.trim();
 
     statusContainer.innerHTML = '<p class="loading-spinner">Validando cardápio no sistema...</p>';
 
     try {
-      const docRef = db.collection('CardapioIA').doc(globalDocId);
+      const docRef = db.collection('CardapioIA').doc(docId.trim());
       const docSnap = await docRef.get();
 
       if (docSnap.exists) {
         const data = docSnap.data();
 
-        // 1. Data do Cardápio
+        // 1. Trata a Data (do seu script original)
         if (data.dataCardapio) {
-          const dateObj = data.dataCardapio.toDate ? data.dataCardapio.toDate() : new Date(data.dataCardapio.seconds * 1000);
-          globalDataCriacao = dateObj.toLocaleDateString('pt-BR');
-        } else if (data.created_at) {
-          const dateObj = data.created_at.toDate ? data.created_at.toDate() : new Date(data.created_at.seconds * 1000);
-          globalDataCriacao = dateObj.toLocaleDateString('pt-BR');
+          const dataValida = data.dataCardapio.toDate ? data.dataCardapio.toDate() : new Date(data.dataCardapio.seconds * 1000);
+          globalDataCriacao = dataValida.toLocaleDateString('pt-BR');
         } else {
           globalDataCriacao = new Date().toLocaleDateString('pt-BR');
         }
 
-        // 2. Busca do Paciente na Coleção 'users'
+        // 2. Busca o nome do usuário/paciente na coleção users (se houver userID)
         let rawUid = data.userID || data.user_id || data.userId || data.uid;
-        let uid = '';
         if (rawUid) {
-          uid = (typeof rawUid === 'object' && rawUid.id) ? rawUid.id : (typeof rawUid === 'string' && rawUid.includes('/') ? rawUid.split('/').pop() : rawUid);
-        }
-
-        if (uid) {
+          let uid = (typeof rawUid === 'object' && rawUid.id) ? rawUid.id : (typeof rawUid === 'string' && rawUid.includes('/') ? rawUid.split('/').pop() : rawUid);
           try {
             const userSnap = await db.collection('users').doc(uid).get();
             if (userSnap.exists) {
               const uData = userSnap.data();
               globalNomePaciente = uData.display_name || uData.nome || uData.name || 'Não informado';
             }
-          } catch (errUser) {
-            console.error("Erro ao ler usuário:", errUser);
-          }
-        }
-
-        // 3. Parser Inteligente do Cardápio
-        let rawCardapio = data.Cardapio;
-        if (typeof rawCardapio === 'string') {
-          try {
-            globalCardapioObj = JSON.parse(rawCardapio);
           } catch (e) {
-            globalCardapioObj = rawCardapio;
+            console.error("Erro ao carregar usuário:", e);
           }
-        } else {
-          globalCardapioObj = rawCardapio;
         }
 
-        // Monta a estrutura visual do PDF
-        montarPDF(globalCardapioObj, globalDocId, globalNomePaciente, globalDataCriacao);
-
-        // Tela de resultado
+        // 3. Monta e insere o HTML da validação na tela (Lógica idêntica à sua)
         let html = '<div class="result-card result-success">';
-        html += '<div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">✓ Cardápio Válido e Autêntico!</div>';
+        html += '<div class="result-title"> Cardápio Válido e Autêntico!</div>';
+        html += `<p><strong>ID do Cardápio:</strong> ${docSnap.id}</p>`;
         html += `<p><strong>Paciente:</strong> ${globalNomePaciente}</p>`;
-        html += `<p><strong>ID do Cardápio:</strong> ${globalDocId}</p>`;
-        html += `<p><strong>Data de Emissão:</strong> ${globalDataCriacao}</p>`;
-        html += `<button class="btn-download-pdf" onclick="baixarPDF()">📄 Baixar Cardápio em PDF</button>`;
-        html += '</div>';
+        html += `<p><strong>Data:</strong> ${globalDataCriacao}</p>`;
 
+        if (data.Cardapio) {
+          // Processa o conteúdo do cardápio para montar a visualização no PDF oculto
+          montarPDF(data.Cardapio, docSnap.id, globalNomePaciente, globalDataCriacao);
+          
+          html += `<button class="btn-download-pdf" onclick="baixarPDF()" style="margin-top:15px; padding:10px 18px; background-color:#2e7d32; color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">📄 Baixar Cardápio em PDF</button>`;
+        }
+
+        html += '</div>';
         statusContainer.innerHTML = html;
 
       } else {
         statusContainer.innerHTML = `
           <div class="result-card result-error">
-            <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Cardápio não localizado</div>
+            <div class="result-title"> Cardápio não localizado</div>
             <p>O ID "<strong>${docId}</strong>" não consta em nosso sistema.</p>
           </div>
         `;
       }
     } catch (error) {
-      console.error("Erro ao buscar no Firestore:", error);
+      console.error("Erro ao buscar documento no Firestore:", error);
       statusContainer.innerHTML = `
         <div class="result-card result-error">
-          <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">Erro na Validação</div>
-          <p>Não foi possível conectar ao banco de dados.</p>
+          <div class="result-title">Erro na Validação</div>
+          <p>Não foi possível conectar ao banco de dados. Verifique sua conexão e credenciais.</p>
         </div>
       `;
     }
   }
 
-  function montarPDF(cardapio, docId, paciente, dataCriacao) {
+  // Função Universal para formatar o corpo do PDF sem perdas
+  function montarPDF(rawCardapio, docId, paciente, dataCriacao) {
     const pdfContainer = document.getElementById('pdf-content');
     const dataHoje = new Date().toLocaleDateString('pt-BR');
+    let conteudoHtml = '';
 
-    let refeicoesHtml = '';
+    let parsed = rawCardapio;
+    if (typeof rawCardapio === 'string') {
+      try {
+        parsed = JSON.parse(rawCardapio);
+      } catch (e) {
+        parsed = rawCardapio; // Mantém como texto puro caso não seja um JSON
+      }
+    }
 
-    // Mapeamento de nomes amigáveis para as refeições
-    const titulosRefeicoes = {
-      cafe_manha: 'Café da Manhã',
-      lanche_manha: 'Lanche da Manhã',
-      almoco: 'Almoço',
-      lanche_tarde: 'Lanche da Tarde',
-      jantar: 'Jantar',
-      ceia: 'Ceia'
-    };
+    // Se for um Objeto/JSON formatado
+    if (typeof parsed === 'object' && parsed !== null) {
+      Object.keys(parsed).forEach(key => {
+        const item = parsed[key];
+        const titulo = key.replace(/_/g, ' ').toUpperCase();
 
-    if (cardapio && typeof cardapio === 'object') {
-      // Varre todas as chaves recebidas no objeto do cardápio
-      Object.keys(cardapio).forEach(key => {
-        const item = cardapio[key];
-
-        // Ignora campos meta do JSON se houver
-        if (typeof item === 'object' && item !== null && (item.prato || item.preparo)) {
-          const tituloExibicao = titulosRefeicoes[key] || key.replace(/_/g, ' ').toUpperCase();
-
-          refeicoesHtml += `
-            <div class="pdf-card">
-              <div class="pdf-card-header">${tituloExibicao}</div>
-              <div class="pdf-card-title">${item.prato || ''}</div>
-              <div class="pdf-card-body"><strong>Preparo:</strong> ${item.preparo || ''}</div>
-              ${item.topping ? `<div class="pdf-badge pdf-badge-benefit"><strong>Dica / Topping:</strong> ${item.topping}</div>` : ''}
-              ${item.substituicoes ? `<div class="pdf-badge pdf-badge-subst"><strong>Substituições:</strong> ${item.substituicoes}</div>` : ''}
-              ${item.beneficio || item.motivo ? `<div class="pdf-card-body" style="margin-top:6px; font-style:italic;"><strong>Benefício:</strong> ${item.beneficio || item.motivo}</div>` : ''}
+        if (typeof item === 'object' && item !== null) {
+          conteudoHtml += `
+            <div class="pdf-card" style="border:1px solid #e2e8f0; border-radius:6px; padding:12px; margin-bottom:10px;">
+              <div style="color:#1a5d57; font-weight:bold; font-size:10pt;">${titulo}</div>
+              <div style="font-weight:bold; font-size:11pt; margin:4px 0;">${item.prato || item.nome || ''}</div>
+              <div style="font-size:9.5pt; color:#4a5568;">${item.preparo || item.descricao || ''}</div>
+              ${item.topping ? `<div style="background:#f0fdf4; color:#166534; padding:4px 8px; font-size:8.5pt; margin-top:4px; border-radius:4px;"><strong>Dica:</strong> ${item.topping}</div>` : ''}
+              ${item.substituicoes ? `<div style="background:#fefcbf; color:#744210; padding:4px 8px; font-size:8.5pt; margin-top:4px; border-radius:4px;"><strong>Substituições:</strong> ${item.substituicoes}</div>` : ''}
+            </div>
+          `;
+        } else {
+          conteudoHtml += `
+            <div class="pdf-card" style="border:1px solid #e2e8f0; border-radius:6px; padding:12px; margin-bottom:10px;">
+              <div style="color:#1a5d57; font-weight:bold; font-size:10pt;">${titulo}</div>
+              <div style="font-size:9.5pt; color:#4a5568;">${item}</div>
             </div>
           `;
         }
       });
-    } else if (typeof cardapio === 'string') {
-      // Caso o cardápio venha em formato de texto simples/parágrafo
-      refeicoesHtml = `<div class="pdf-card"><div class="pdf-card-body" style="white-space: pre-wrap;">${cardapio}</div></div>`;
+    } else {
+      // Se for Texto Simples (String sem formato JSON)
+      conteudoHtml = `<div style="white-space: pre-wrap; font-size: 10pt; line-height: 1.5; color: #333;">${parsed}</div>`;
     }
 
     const urlValidacao = `https://nutrifelix.com.br/validar.html?id=${docId}`;
 
     pdfContainer.innerHTML = `
-      <div class="pdf-banner">
-        <div class="pdf-banner-info">
-          <span style="font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">Plano Alimentar Autêntico</span>
-          <h1>PACIENTE: ${paciente.toUpperCase()}</h1>
+      <div class="pdf-banner" style="background:#1a5d57; color:white; padding:16px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div>
+          <span style="font-size:8pt; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">Plano Alimentar Autêntico</span>
+          <h1 style="font-size:14pt; margin-top:2px;">PACIENTE: ${paciente.toUpperCase()}</h1>
         </div>
-        <img src="nutriLogo.png" class="pdf-banner-logo" alt="Nutri Logo">
+        <img src="nutriLogo.png" style="height:45px; background:white; padding:4px; border-radius:4px;" alt="Logo">
       </div>
 
-      <div class="pdf-dates">
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:8px 12px; border-radius:6px; margin-bottom:15px; font-size:8.5pt; color:#166534; display:flex; justify-content:space-between;">
         <div><strong>Data do Cardápio:</strong> ${dataCriacao}</div>
-        <div><strong>Data de Baixa:</strong> ${dataHoje}</div>
-        <div><strong>Ref ID:</strong> ${docId}</div>
+        <div><strong>Emissão do PDF:</strong> ${dataHoje}</div>
+        <div><strong>ID:</strong> ${docId}</div>
       </div>
 
-      <div>
-        ${refeicoesHtml || '<p style="text-align:center; padding: 20px;">Conteúdo do cardápio não formatado corretamente.</p>'}
-      </div>
+      <div>${conteudoHtml}</div>
 
-      <div class="pdf-footer">
+      <div style="margin-top:25px; border-top:1px solid #e2e8f0; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
         <div id="qrcode-pdf"></div>
-        <div style="font-size: 8.5pt; color: #4a5568; text-align: right;">
-          <div style="font-weight: bold; color: #1a5d57; font-size: 10pt;">Christina Félix da Silva</div>
+        <div style="font-size:8.5pt; color:#4a5568; text-align:right;">
+          <div style="font-weight:bold; color:#1a5d57;">Christina Félix da Silva</div>
           <div>Nutricionista — CRN3-73810 Fito 0640</div>
-          <div style="font-size: 7.5pt; color: #718096; margin-top: 2px;">
-            Documento validado via nutrifelix.com.br
-          </div>
+          <div style="font-size:7.5pt; color:#718096;">nutrifelix.com.br</div>
         </div>
       </div>
     `;
 
-    // Renderiza o QR Code
     setTimeout(() => {
       const qrContainer = document.getElementById('qrcode-pdf');
       if (qrContainer) {
         qrContainer.innerHTML = '';
         new QRCode(qrContainer, {
           text: urlValidacao,
-          width: 60,
-          height: 60,
-          colorDark : "#1a5d57",
-          colorLight : "#ffffff",
-          correctLevel : QRCode.CorrectLevel.M
+          width: 55,
+          height: 55,
+          colorDark: "#1a5d57",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
         });
       }
     }, 100);
@@ -380,7 +362,7 @@
   function baixarPDF() {
     const element = document.getElementById('pdf-content');
     const opt = {
-      margin:       0,
+      margin:       10,
       filename:     `Cardapio_${globalNomePaciente.replace(/\s+/g, '_')}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true },
@@ -390,18 +372,21 @@
     html2pdf().set(opt).from(element).save();
   }
 
-  // Leitura automática da URL
+  // Leitura da URL ao carregar a página
   window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    let codigoParam = urlParams.get('id') || urlParams.get('codigo');
+    const search = window.location.search;
+    if (search) {
+      const urlParams = new URLSearchParams(search);
+      let codigoParam = urlParams.get('id') || urlParams.get('codigo');
 
-    if (!codigoParam && window.location.search.length > 1) {
-      codigoParam = decodeURIComponent(window.location.search.substring(1));
-    }
+      if (!codigoParam && search.length > 1) {
+        codigoParam = decodeURIComponent(search.substring(1));
+      }
 
-    if (codigoParam) {
-      input.value = codigoParam.trim();
-      validarCardapio(codigoParam.trim());
+      if (codigoParam) {
+        input.value = codigoParam.trim();
+        validarCardapio(codigoParam.trim());
+      }
     }
   });
 
