@@ -10,57 +10,97 @@
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
+            text-align: center;
         }
-        /* Seu estilo original dos cards e do topo */
+
+        /* Retângulo superior marrom clarinho alinhado à esquerda */
+        .topo-container {
+            background-color: #e8ded2;
+            padding: 10px 20px;
+            text-align: left;
+            border-bottom: 1px solid #d4c5b9;
+            width: fit-content; /* Faz o retângulo ocupar apenas o espaço necessário */
+            min-width: 250px;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 20px;
+        }
+
+        .topo-container img {
+            height: 45px;
+            cursor: pointer; /* Indica que é clicável para voltar ao início */
+        }
+
+        /* Container dos 4 cards centralizado */
         .cards-container {
             display: flex;
             justify-content: center;
             gap: 20px;
-            padding: 20px;
+            padding: 10px 20px;
             flex-wrap: wrap;
         }
+
+        /* Medidas exatas do card: 180 de largura por 300 de altura */
         .card {
             background: #fff;
             border: 1px solid #ddd;
             border-radius: 8px;
-            width: 200px;
+            width: 180px;
+            height: 300px;
             text-align: center;
             padding: 10px;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
         }
+
         .card:hover {
             transform: translateY(-5px);
         }
+
+        /* Imagens dentro dos cards: 150 de altura por 200 de largura */
         .card img {
-            width: 100%;
+            width: 200px;
             height: 150px;
+            max-width: 100%;
             object-fit: cover;
             border-radius: 4px;
         }
-        /* Estilo para a área onde o validar.html vai aparecer */
+
+        .card p {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* PAINEL / IFRAME ABAIXO DOS CARDS */
         #painel-validador {
-            display: none;
-            width: 90%;
-            max-width: 1000px;
-            margin: 20px auto;
+            display: none; /* Oculto inicialmente */
+            width: 820px; /* Largura proporcional e alinhada aos 4 cards juntos */
+            max-width: 95%;
+            margin: 30px auto;
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             overflow: hidden;
+            border: 1px solid #ccc;
         }
+
         #iframe-validador {
             width: 100%;
-            height: 650px;
+            height: 550px;
             border: none;
         }
     </style>
 </head>
 <body>
 
-    <div style="background: #e8ded2; padding: 15px; text-align: center; border-bottom: 1px solid #d4c5b9;">
-        <img src="nutriLogo.png" alt="Nutri Félix Logo" style="height: 50px;">
+    <div class="topo-container">
+        <img src="nutriLogo.png" alt="Nutri Félix Logo" onclick="voltarInicio()" title="Ir para a página inicial">
     </div>
 
     <div class="cards-container">
@@ -69,7 +109,7 @@
             <p>A Nutri Félix</p>
         </div>
 
-        <div class="card" onclick="alternarValidador()">
+        <div class="card" onclick="carregarValidador()">
             <img src="20260424_155202(1).jpg" alt="Meu App">
             <p>Meu App</p>
         </div>
@@ -90,27 +130,34 @@
     </div>
 
     <script>
-        function alternarValidador() {
+        // Função chamada ao clicar no segundo card ("Meu App")
+        function carregarValidador() {
             const painel = document.getElementById('painel-validador');
             const iframe = document.getElementById('iframe-validador');
 
-            // Se o painel estiver oculto, ele abre e carrega o validar.html
-            if (painel.style.display === 'none' || painel.style.display === '') {
-                iframe.src = 'validar.html'; // Carrega o arquivo validar.html original do seu repositório
-                painel.style.display = 'block';
-                
-                // Rola a tela suavemente para mostrar o painel embaixo dos cards
-                painel.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                // Se clicar de novo, ele oculta
-                painel.style.display = 'none';
-                iframe.src = ''; // Limpa o iframe
-            }
+            // Carrega o validar.html dentro do iframe alinhado
+            iframe.src = 'validar.html';
+            painel.style.display = 'block';
+            
+            // Rola suavemente para o painel sem cobrir tudo de forma exagerada
+            painel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Função chamada ao clicar na logo da Nutri Félix (Botão Home)
+        function voltarInicio() {
+            const painel = document.getElementById('painel-validador');
+            const iframe = document.getElementById('iframe-validador');
+
+            // Fecha/limpa o iframe e oculta o painel
+            iframe.src = '';
+            painel.style.display = 'none';
+
+            // Retorna o scroll para o topo da página
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function abrirSecao(secao) {
-            // Caso queira programar os outros cards no futuro
-            console.log('Clicou em: ' + secao);
+            console.log('Seção clicada: ' + secao);
         }
     </script>
 </body>
