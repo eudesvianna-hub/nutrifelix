@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babus, meu ônibus consultório!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 850px;
+            border: 4px solid #4CAF50;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: clamp(1.2rem, 2.2vw, 1.7rem);
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .content-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .content-layout {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+
+        /* Seção da Doutora e Aviso */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .construction-text {
+            font-weight: bold;
+            color: #d9534f;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-width: 140px;
+            text-transform: uppercase;
+        }
+
+        .doctor-img {
+            width: 120px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* Grade de Fotos do Ônibus - Apenas Imagens */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+        }
+
+        @media (min-width: 600px) {
+            .photo-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+       .photo-card {
+    background: #fff;
+    border: 3px solid #4CAF50;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Removido o aspect-ratio fixo para a borda abraçar a foto livremente */
+}
+
+.photo-card img {
+    width: 100%;
+    height: auto; /* Deixa a altura proporcional à largura da foto */
+    display: block;
+    object-fit: contain;
+}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Nessa página você vai conhecer a Nutri Félix<br>que transformou uma grande dor em um exemplo de força!</h1>
+        
+        <div class="content-layout">
+            <div class="sidebar">
+                <div class="construction-text">
+                    Página em construção.<br>Aguarde
+                </div>
+                <img src="473623.png" alt="Doutora" class="doctor-img">
+            </div>
+
+            <div class="photo-grid">
+                <div class="photo-card">
+                    <img src="nutri1.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
