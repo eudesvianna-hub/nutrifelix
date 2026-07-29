@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Babus, meu ônibus consultório!</title>
+    <title>Nutri Félix - Conheça a História</title>
     <style>
         * {
             box-sizing: border-box;
@@ -49,7 +49,7 @@
         @media (min-width: 768px) {
             .content-layout {
                 flex-direction: row;
-                align-items: flex-start;
+                align-items: center; /* Centraliza verticalmente ao lado da doutora */
             }
         }
 
@@ -78,37 +78,31 @@
             object-fit: contain;
         }
 
-        /* Grade de Fotos do Ônibus - Apenas Imagens */
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+        /* Quadro único para a foto horizontal da Nutri */
+        .single-photo-container {
             width: 100%;
+            display: flex;
+            justify-content: center;
         }
 
-        @media (min-width: 600px) {
-            .photo-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .photo-card {
+            background: #fff;
+            border: 3px solid #4CAF50;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 480px; /* Controla o tamanho máximo ideal para a foto horizontal */
         }
 
-       .photo-card {
-    background: #fff;
-    border: 3px solid #4CAF50;
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Removido o aspect-ratio fixo para a borda abraçar a foto livremente */
-}
-
-.photo-card img {
-    width: 200%;
-    height: auto; /* Deixa a altura proporcional à largura da foto */
-    display: block;
-    object-fit: contain;
-}
+        .photo-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -124,9 +118,9 @@
                 <img src="473623.png" alt="Doutora" class="doctor-img">
             </div>
 
-            <div class="photo-grid">
+            <div class="single-photo-container">
                 <div class="photo-card">
-                    <img src="nutri1.jpg" alt="">
+                    <img src="nutri1.jpg" alt="Nutri Félix">
                 </div>
             </div>
         </div>
