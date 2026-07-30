@@ -13,22 +13,21 @@
             text-align: center;
         }
 
-        /* Container principal que centraliza o layout */
+        /* Container principal com controle centralizado de largura */
         .wrapper-principal {
-            width: fit-content;
+            width: 100%;
+            max-width: 820px;
             margin: 20px auto;
-            max-width: 100%;
             padding: 0 10px;
             box-sizing: border-box;
         }
 
-        /* Retângulo superior marrom clarinho */
+        /* Retângulo superior */
         .topo-container {
             background-color: #e8ded2;
             padding: 12px 20px;
             border: 1px solid #d4c5b9;
-            width: 820px;
-            max-width: 100%;
+            width: 100%;
             box-sizing: border-box;
             border-radius: 12px;
             margin-bottom: 15px;
@@ -44,7 +43,6 @@
             flex-shrink: 0;
         }
 
-        /* Estilo para o novo texto no topo */
         .topo-frase {
             font-family: "Brush Script MT", "Caveat", "Segoe Script", cursive, sans-serif;
             font-size: 24px;
@@ -59,12 +57,11 @@
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
-            width: 820px;
-            max-width: 100%;
+            width: 100%;
             margin-bottom: 25px;
         }
 
-        /* Dimensões do card para computador */
+        /* Dimensões do card adaptadas para elemento button */
         .card {
             background: #fff;
             border: 1px solid #ddd;
@@ -75,7 +72,7 @@
             padding: 12px 8px;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -83,11 +80,12 @@
             box-sizing: border-box;
         }
 
-        .card:hover {
+        .card:hover, .card:focus {
             transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            outline: none;
         }
 
-        /* Imagens do card */
         .card img {
             width: 130px;
             height: 175px;
@@ -104,11 +102,10 @@
             padding-bottom: 5px;
         }
 
-        /* PAINEL / IFRAME NA PARTE DE BAIXO */
+        /* PAINEL / IFRAME */
         #painel-validador {
             display: block;
-            width: 820px;
-            max-width: 100%;
+            width: 100%;
             margin: 0 auto 30px auto;
             background: #fff;
             border-radius: 12px;
@@ -126,14 +123,14 @@
             display: block;
         }
 
-        /* RESPONSIVIDADE PARA CELULARES (Telas até 768px) */
+        /* RESPONSIVIDADE PARA CELULARES */
         @media (max-width: 768px) {
             .cards-container {
                 gap: 8px;
             }
 
             .card {
-                width: calc(25% - 8px);
+                width: calc(25% - 6px);
                 height: 190px;
                 padding: 6px 4px;
             }
@@ -145,7 +142,6 @@
 
             .card p {
                 font-size: 10.5px;
-                font-weight: bold;
             }
 
             .topo-frase {
@@ -156,40 +152,38 @@
 </head>
 <body>
 
-    <div class="wrapper-principal">
-        <div class="topo-container">
-            <!-- Logo atualizada para carregar nutri.html -->
+    <main class="wrapper-principal">
+        <header class="topo-container">
             <img src="nutriLogo.png" alt="Nutri Félix Logo" onclick="carregarPaginaIframe('nutri.html')" title="Ir para a página inicial">
             <p class="topo-frase">Seja você sua maior inspiração</p>
-        </div>
+        </header>
 
-        <div class="cards-container">
-            <div class="card" onclick="carregarPaginaIframe('nutri.html')">
+        <nav class="cards-container" aria-label="Navegação principal">
+            <button class="card" onclick="carregarPaginaIframe('nutri.html')">
                 <img src="20260424_155202(1).jpg" alt="A Nutri Félix">
                 <p>A Nutri Félix</p>
-            </div>
+            </button>
 
-            <div class="card" onclick="carregarPaginaIframe('validar.html')">
+            <button class="card" onclick="carregarPaginaIframe('validar.html')">
                 <img src="1785022150778(1)(1).png" alt="Meu App">
                 <p>Meu App</p>
-            </div>
+            </button>
 
-            <div class="card" onclick="carregarPaginaIframe('babus.html')">
+            <button class="card" onclick="carregarPaginaIframe('babus.html')">
                 <img src="lv_0_20260127193932(1).jpg" alt="O Babus">
                 <p>O Babus</p>
-            </div>
+            </button>
 
-            <div class="card" onclick="carregarPaginaIframe('voce.html')">
+            <button class="card" onclick="carregarPaginaIframe('voce.html')">
                 <img src="nutricci.png" alt="Para você">
                 <p>Para você</p>
-            </div>
-        </div>
+            </button>
+        </nav>
 
-        <div id="painel-validador">
-            <!-- Iframe inicializado diretamente com nutri.html -->
-            <iframe id="iframe-validador" scrolling="no" src="nutri.html"></iframe>
-        </div>
-    </div>
+        <section id="painel-validador">
+            <iframe id="iframe-validador" title="Conteúdo selecionado" scrolling="no" src="nutri.html"></iframe>
+        </section>
+    </main>
 
     <script>
         function carregarPaginaIframe(pagina) {
@@ -197,7 +191,6 @@
             iframe.src = pagina;
         }
 
-        // Ao carregar a página, verifica se veio algum parâmetro 'id' ou 'codigo' na URL principal (ex: nutrifelix.com.br/?id=XYZ)
         window.addEventListener('DOMContentLoaded', () => {
             const search = window.location.search;
             if (search) {
@@ -209,7 +202,6 @@
                 }
 
                 if (codigoParam) {
-                    // Carrega o validador dentro do iframe passando o ID direto na URL dele
                     const iframe = document.getElementById('iframe-validador');
                     iframe.src = `validar.html?id=${encodeURIComponent(codigoParam.trim())}`;
                 }
@@ -221,11 +213,7 @@
                 const iframeDoc = this.contentDocument || this.contentWindow.document;
                 if (iframeDoc) {
                     const alturaConteudo = iframeDoc.documentElement.scrollHeight || iframeDoc.body.scrollHeight;
-                    if (alturaConteudo > 600) {
-                        this.style.height = alturaConteudo + 'px';
-                    } else {
-                        this.style.height = '600px';
-                    }
+                    this.style.height = (alturaConteudo > 600 ? alturaConteudo : 600) + 'px';
                 }
             } catch (e) {
                 console.log('Ajuste de altura automático via iframe (Cross-origin restrito localmente).');
