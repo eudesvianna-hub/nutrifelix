@@ -169,7 +169,7 @@
                 <p>A Nutri Félix</p>
             </div>
 
-            <div class="card" onclick="carregarPaginaIframe('validar.html')">
+            <div class="card" onclick="carregarPaginaIframe('appdesafio.html')">
                 <img src="1785022150778(1)(1).png" alt="Meu App">
                 <p>Meu App</p>
             </div>
@@ -211,7 +211,7 @@
                 if (codigoParam) {
                     // Carrega o validador dentro do iframe passando o ID direto na URL dele
                     const iframe = document.getElementById('iframe-validador');
-                    iframe.src = `validar.html?id=${encodeURIComponent(codigoParam.trim())}`;
+                    iframe.src = `appdesafio.html?id=${encodeURIComponent(codigoParam.trim())}`;
                 }
             }
         });
