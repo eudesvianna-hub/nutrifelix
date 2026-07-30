@@ -3,289 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutri Félix</title>
+    <title>Nutri Félix - Início</title>
     <style>
-        /* BASE E CORES SELECIONADAS */
-        * {
-            box-sizing: border-box;
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
         }
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(180deg, #E8F5E9 0%, #F5EBE6 50%, #FFFFFF 100%);
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* BARRA SUPERIOR (HEADER) */
-        .header-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            padding: 12px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid #E0E0E0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        }
-
-        .btn-menu {
-            background: none;
-            border: none;
-            font-size: 26px;
-            cursor: pointer;
-            color: #2E7D32;
-            display: flex;
-            align-items: center;
-            padding: 5px;
-        }
-
-        .header-title {
-            font-family: "Brush Script MT", "Caveat", cursive, sans-serif;
-            font-size: 22px;
-            color: #4A3B32;
-            text-align: right;
-        }
-
-        /* MENU LATERAL SLIDE (DRAWER) */
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.4);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 200;
-        }
-
-        .menu-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .drawer-menu {
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 270px;
-            height: 100%;
-            background: #FFFFFF;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-            transition: left 0.3s ease;
-            z-index: 201;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .drawer-menu.active {
-            left: 0;
-        }
-
-        .drawer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #E0E0E0;
-            margin-bottom: 15px;
-        }
-
-        .drawer-header h3 {
-            color: #2E7D32;
-            font-size: 18px;
-        }
-
-        .btn-fechar {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #888;
-            cursor: pointer;
-        }
-
-        /* OPÇÕES DO MENU */
-        .menu-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            border-radius: 10px;
-            color: #444;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .menu-item:hover, .menu-item.active {
-            background-color: #E8F5E9;
-            color: #2E7D32;
-        }
-
-        .menu-item svg {
-            width: 22px;
-            height: 22px;
-            fill: currentColor;
-        }
-
-        /* ÁREA DE CONTEÚDO PRINCIPAL (SEM IFRAME) */
-        #conteudo-principal {
-            flex: 1;
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px 15px;
+        /* Container principal que centraliza o layout */
+        .wrapper-principal {
+            width: fit-content;
+            margin: 20px auto;
+            max-width: 100%;
+            padding: 0 10px;
             box-sizing: border-box;
         }
 
-        /* RODAPÉ */
-        footer {
-            background-color: #2E7D32;
-            color: #FFFFFF;
+        /* Retângulo superior marrom clarinho */
+        .topo-container {
+            background-color: #e8ded2;
+            padding: 12px 20px;
+            border: 1px solid #d4c5b9;
+            width: 820px;
+            max-width: 100%;
+            box-sizing: border-box;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 15px;
+        }
+
+        .topo-container img {
+            height: 45px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Estilo para o novo texto no topo */
+        .topo-frase {
+            font-family: "Brush Script MT", "Caveat", "Segoe Script", cursive, sans-serif;
+            font-size: 24px;
+            color: #4a3b32;
+            margin: 0;
+            text-align: left;
+        }
+
+        /* Container dos 4 cards */
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 820px;
+            max-width: 100%;
+            margin-bottom: 25px;
+        }
+
+        /* Dimensões do card para computador */
+        .card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            width: 180px;
+            height: 300px;
             text-align: center;
-            padding: 15px;
-            font-size: 13px;
-            margin-top: auto;
+            padding: 12px 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
         }
 
-        /* ANIMAÇÃO DE CARREGAMENTO SUAVE DO CONTEÚDO */
-        .fade-in {
-            animation: fadeIn 0.4s ease-in-out;
+        .card:hover {
+            transform: translateY(-5px);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Imagens do card */
+        .card img {
+            width: 130px;
+            height: 175px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            padding-bottom: 5px;
+        }
+
+        /* PAINEL / IFRAME NA PARTE DE BAIXO */
+        #painel-validador {
+            display: block;
+            width: 820px;
+            max-width: 100%;
+            margin: 0 auto 30px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        #iframe-validador {
+            width: 100%;
+            min-height: 600px;
+            border: none;
+            overflow: hidden;
+            display: block;
+        }
+
+        /* RESPONSIVIDADE PARA CELULARES (Telas até 768px) */
+        @media (max-width: 768px) {
+            .cards-container {
+                gap: 8px;
+            }
+
+            .card {
+                width: calc(25% - 8px);
+                height: 190px;
+                padding: 6px 4px;
+            }
+
+            .card img {
+                width: 100%;
+                height: 105px;
+            }
+
+            .card p {
+                font-size: 10.5px;
+                font-weight: bold;
+            }
+
+            .topo-frase {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <header class="header-bar">
-        <button class="btn-menu" id="btn-toggle-menu" aria-label="Abrir Menu">☰</button>
-        <div class="header-title">Seja você sua maior inspiração</div>
-    </header>
-
-    <div class="menu-overlay" id="menu-overlay"></div>
-    
-    <nav class="drawer-menu" id="drawer-menu">
-        <div class="drawer-header">
-            <h3>🌿 Nutri Félix</h3>
-            <button class="btn-fechar" id="btn-close-menu">&times;</button>
+    <div class="wrapper-principal">
+        <div class="topo-container">
+            <!-- Logo atualizada para carregar nutri.html -->
+            <img src="nutriLogo.png" alt="Nutri Félix Logo" onclick="carregarPaginaIframe('nutri.html')" title="Ir para a página inicial">
+            <p class="topo-frase">Seja você sua maior inspiração</p>
         </div>
-        <ul class="menu-list">
-            <li>
-                <a class="menu-item active" onclick="carregarPagina('nutri.html', this)">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-                    A Nutri Félix
-                </a>
-            </li>
-            <li>
-                <a class="menu-item" onclick="carregarPagina('validar.html', this)">
-                    <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
-                    Meu App
-                </a>
-            </li>
-            <li>
-                <a class="menu-item" onclick="carregarPagina('babus.html', this)">
-                    <svg viewBox="0 0 24 24"><path d="M4 16c0 1.1.9 2 2 2h1v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h1c1.1 0 2-.9 2-2V6c0-3.5-3.58-4-10-4s-10 .5-10 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>
-                    O Babus
-                </a>
-            </li>
-            <li>
-                <a class="menu-item" onclick="carregarPagina('voce.html', this)">
-                    <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
-                    Para você
-                </a>
-            </li>
-        </ul>
-    </nav>
 
-    <main id="conteudo-principal" class="fade-in">
-        </main>
+        <div class="cards-container">
+            <div class="card" onclick="carregarPaginaIframe('nutri.html')">
+                <img src="20260424_155202(1).jpg" alt="A Nutri Félix">
+                <p>A Nutri Félix</p>
+            </div>
 
-    <footer>
-        <p>&copy; Nutri Félix - Todos os direitos reservados.</p>
-    </footer>
+            <div class="card" onclick="carregarPaginaIframe('validar.html')">
+                <img src="1785022150778(1)(1).png" alt="Meu App">
+                <p>Meu App</p>
+            </div>
+
+            <div class="card" onclick="carregarPaginaIframe('babus.html')">
+                <img src="lv_0_20260127193932(1).jpg" alt="O Babus">
+                <p>O Babus</p>
+            </div>
+
+            <div class="card" onclick="carregarPaginaIframe('voce.html')">
+                <img src="nutricci.png" alt="Para você">
+                <p>Para você</p>
+            </div>
+        </div>
+
+        <div id="painel-validador">
+            <!-- Iframe inicializado diretamente com nutri.html -->
+            <iframe id="iframe-validador" scrolling="no" src="nutri.html"></iframe>
+        </div>
+    </div>
 
     <script>
-        const btnToggle = document.getElementById('btn-toggle-menu');
-        const btnClose = document.getElementById('btn-close-menu');
-        const overlay = document.getElementById('menu-overlay');
-        const drawer = document.getElementById('drawer-menu');
-        const containerConteudo = document.getElementById('conteudo-principal');
-
-        // FUNÇÕES DO MENU LATERAL
-        function abrirMenu() {
-            drawer.classList.add('active');
-            overlay.classList.add('active');
+        function carregarPaginaIframe(pagina) {
+            const iframe = document.getElementById('iframe-validador');
+            iframe.src = pagina;
         }
 
-        function fecharMenu() {
-            drawer.classList.remove('active');
-            overlay.classList.remove('active');
-        }
-
-        btnToggle.addEventListener('click', abrirMenu);
-        btnClose.addEventListener('click', fecharMenu);
-        overlay.addEventListener('click', fecharMenu);
-
-        // CARREGAMENTO NATIVO VIA FETCH (SEM IFRAME)
-        async function carregarPagina(url, elementoMenu) {
-            fecharMenu();
-            
-            // Destaque visual no menu
-            if(elementoMenu) {
-                document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-                elementoMenu.classList.add('active');
-            }
-
-            try {
-                const resposta = await fetch(url);
-                if (!resposta.ok) throw new Error('Erro ao carregar conteúdo');
-                
-                const htmlTexto = await resposta.text();
-                
-                // Extrai apenas o que estiver dentro da tag <body> das páginas secundárias (se houver)
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlTexto, 'text/html');
-                const conteudoBody = doc.body ? doc.body.innerHTML : htmlTexto;
-
-                // Animação e Injeção Nativa
-                containerConteudo.classList.remove('fade-in');
-                void containerConteudo.offsetWidth; // Força reflow da animação
-                containerConteudo.innerHTML = conteudoBody;
-                containerConteudo.classList.add('fade-in');
-
-                // Garante que o topo da tela seja exibido
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            } catch (erro) {
-                console.error(erro);
-                containerConteudo.innerHTML = `<div style="padding: 40px; text-align: center;"><h3>Página em manutenção</h3><p>Não foi possível carregar o conteúdo no momento.</p></div>`;
-            }
-        }
-
-        // LÓGICA DE PARÂMETROS DA URL (?id=XYZ)
+        // Ao carregar a página, verifica se veio algum parâmetro 'id' ou 'codigo' na URL principal (ex: nutrifelix.com.br/?id=XYZ)
         window.addEventListener('DOMContentLoaded', () => {
             const search = window.location.search;
             if (search) {
@@ -297,15 +209,28 @@
                 }
 
                 if (codigoParam) {
-                    const menuItemApp = document.querySelectorAll('.menu-item')[1];
-                    carregarPagina(`validar.html?id=${encodeURIComponent(codigoParam.trim())}`, menuItemApp);
-                    return;
+                    // Carrega o validador dentro do iframe passando o ID direto na URL dele
+                    const iframe = document.getElementById('iframe-validador');
+                    iframe.src = `validar.html?id=${encodeURIComponent(codigoParam.trim())}`;
                 }
             }
-            
-            // Carregamento Padrão Inicial
-            const menuNutri = document.querySelectorAll('.menu-item')[0];
-            carregarPagina('nutri.html', menuNutri);
+        });
+
+        document.getElementById('iframe-validador').addEventListener('load', function() {
+            try {
+                const iframeDoc = this.contentDocument || this.contentWindow.document;
+                if (iframeDoc) {
+                    const alturaConteudo = iframeDoc.documentElement.scrollHeight || iframeDoc.body.scrollHeight;
+                    if (alturaConteudo > 600) {
+                        this.style.height = alturaConteudo + 'px';
+                    } else {
+                        this.style.height = '600px';
+                    }
+                }
+            } catch (e) {
+                console.log('Ajuste de altura automático via iframe (Cross-origin restrito localmente).');
+                this.style.height = '600px';
+            }
         });
     </script>
 </body>
